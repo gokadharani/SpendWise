@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpendWise | Modern Personal Expense Tracker</title>
+  <meta name="description" content="A modern, responsive personal expense tracker to record, manage, filter, and analyze your daily finances.">
+  
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="style.css?v=1.6">
+  
+  <!-- Chart.js CDN (Loaded for analytics) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <!-- Top Navigation / App Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon">
+          <i class="fa-solid fa-wallet"></i>
+        </div>
+        <div>
+          <h1 class="brand-title">SpendWise</h1>
+          <p class="brand-subtitle">Smart Personal Expense Tracker</p>
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <!-- Quick Currency Indicator -->
+        <span class="currency-badge">
+          <i class="fa-solid fa-indian-rupee-sign"></i> INR (₹)
+        </span>
+        
+        <!-- Theme Toggle Button (Light/Dark Mode) -->
+        <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="Toggle light and dark mode" title="Toggle Theme">
+          <i class="fa-solid fa-moon theme-icon-moon"></i>
+          <i class="fa-solid fa-sun theme-icon-sun"></i>
+          <span class="theme-label">Dark Mode</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Application Wrapper -->
+  <main class="main-container">
+    
+    <!-- 1. DASHBOARD KPI CARDS -->
+    <section class="dashboard-section" aria-labelledby="dashboard-heading">
+      <h2 id="dashboard-heading" class="sr-only">Financial Summary Dashboard</h2>
+      
+      <div class="stats-grid">
+        <!-- Stat Card: Total Expenses -->
+        <div class="stat-card stat-total">
+          <div class="stat-icon-wrapper">
+            <i class="fa-solid fa-coins"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Total Expenses</span>
+            <h3 class="stat-value" id="totalExpensesDisplay">₹0.00</h3>
+            <span class="stat-meta">Lifetime logged</span>
+          </div>
+        </div>
+
+        <!-- Stat Card: This Month's Expenses -->
+        <div class="stat-card stat-month">
+          <div class="stat-icon-wrapper">
+            <i class="fa-solid fa-calendar-days"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">This Month</span>
+            <h3 class="stat-value" id="monthExpensesDisplay">₹0.00</h3>
+            <span class="stat-meta" id="currentMonthLabel">Current Month</span>
+          </div>
+        </div>
+
+        <!-- Stat Card: Transactions Count -->
+        <div class="stat-card stat-count">
+          <div class="stat-icon-wrapper">
+            <i class="fa-solid fa-receipt"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Transactions</span>
+            <h3 class="stat-value" id="transactionCountDisplay">0</h3>
+            <span class="stat-meta">Recorded entries</span>
+          </div>
+        </div>
+
+        <!-- Stat Card: Highest Category -->
+        <div class="stat-card stat-top-category">
+          <div class="stat-icon-wrapper">
+            <i class="fa-solid fa-chart-pie"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Top Spending</span>
+            <h3 class="stat-value" id="topCategoryDisplay">None</h3>
+            <span class="stat-meta" id="topCategoryAmount">₹0.00 spent</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. DAILY EXPENSES SUMMARY (YESTERDAY & TODAY) -->
+    <section class="daily-summary-section" aria-label="Daily Spending Summary">
+      <div class="daily-summary-grid">
+        <!-- Yesterday's Expenses (LEFT) -->
+        <div class="daily-summary-card daily-card-yesterday">
+          <div class="daily-card-header">
+            <div class="daily-card-icon">
+              <i class="fa-solid fa-clock-rotate-left"></i>
+            </div>
+            <div class="daily-card-title-group">
+              <span class="daily-card-title">Yesterday's Expenses</span>
+              <span class="daily-card-date" id="yesterdayDateLabel">--</span>
+            </div>
+          </div>
+          <div class="daily-card-total-row">
+            <span class="daily-total-label">Total:</span>
+            <span class="daily-total-amount" id="yesterdayTotalDisplay">₹0.00</span>
+          </div>
+        </div>
+
+        <!-- Today's Expenses (RIGHT) -->
+        <div class="daily-summary-card daily-card-today">
+          <div class="daily-card-header">
+            <div class="daily-card-icon">
+              <i class="fa-solid fa-calendar-day"></i>
+            </div>
+            <div class="daily-card-title-group">
+              <span class="daily-card-title">Today's Expenses</span>
+              <span class="daily-card-date" id="todaySummaryDateLabel">--</span>
+            </div>
+          </div>
+          <div class="daily-card-total-row">
+            <span class="daily-total-label">Total:</span>
+            <span class="daily-total-amount" id="todaySummaryTotalDisplay">₹0.00</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. MONTHLY EXPENSES SUMMARY (LAST MONTH & THIS MONTH) -->
+    <section class="monthly-summary-section" aria-label="Monthly Spending Summary">
+      <div class="monthly-summary-grid">
+        <!-- Last Month's Expenses (LEFT) -->
+        <div class="monthly-summary-card monthly-card-last">
+          <div class="monthly-card-header">
+            <div class="monthly-card-icon">
+              <i class="fa-solid fa-calendar-minus"></i>
+            </div>
+            <div class="monthly-card-title-group">
+              <span class="monthly-card-title">Last Month's Expenses</span>
+              <span class="monthly-card-date" id="lastMonthDateLabel">--</span>
+            </div>
+          </div>
+          <div class="monthly-card-total-row">
+            <span class="monthly-total-label">Total:</span>
+            <span class="monthly-total-amount" id="lastMonthTotalDisplay">₹0.00</span>
+          </div>
+        </div>
+
+        <!-- This Month's Expenses (RIGHT) -->
+        <div class="monthly-summary-card monthly-card-current">
+          <div class="monthly-card-header">
+            <div class="monthly-card-icon">
+              <i class="fa-solid fa-calendar-check"></i>
+            </div>
+            <div class="monthly-card-title-group">
+              <span class="monthly-card-title">This Month's Expenses</span>
+              <span class="monthly-card-date" id="thisMonthSummaryDateLabel">--</span>
+            </div>
+          </div>
+          <div class="monthly-card-total-row">
+            <span class="monthly-total-label">Total:</span>
+            <span class="monthly-total-amount" id="thisMonthSummaryTotalDisplay">₹0.00</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. MONTHLY BUDGET & ALERT SECTION -->
+    <section class="budget-section" aria-labelledby="budget-heading">
+      <div class="budget-card">
+        <div class="budget-header">
+          <div class="budget-title-area">
+            <div class="budget-badge-icon">
+              <i class="fa-solid fa-bullseye"></i>
+            </div>
+            <div>
+              <h2 id="budget-heading" class="budget-card-title">Monthly Budget Planner</h2>
+              <p class="budget-subtitle">Monitor your spending threshold for the current month</p>
+            </div>
+          </div>
+
+          <form id="budgetForm" class="budget-set-form">
+            <label for="monthlyBudgetInput" class="sr-only">Set Monthly Budget</label>
+            <div class="budget-input-group">
+              <span class="currency-symbol">₹</span>
+              <input 
+                type="number" 
+                id="monthlyBudgetInput" 
+                placeholder="Set monthly budget" 
+                min="0" 
+                step="any"
+                required
+              >
+              <button type="submit" class="btn btn-primary btn-sm" id="saveBudgetBtn">
+                <i class="fa-solid fa-check"></i> Set Budget
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Budget Visual Progress -->
+        <div class="budget-progress-container">
+          <div class="budget-progress-bar-bg">
+            <div class="budget-progress-bar-fill" id="budgetProgressFill" style="width: 0%;"></div>
+          </div>
+          <div class="budget-stats-row">
+            <div class="budget-stat-item">
+              <span class="budget-stat-label">Monthly Target</span>
+              <span class="budget-stat-val" id="targetBudgetDisplay">₹0.00</span>
+            </div>
+            <div class="budget-stat-item">
+              <span class="budget-stat-label">Spent this month</span>
+              <span class="budget-stat-val" id="budgetSpentDisplay">₹0.00</span>
+            </div>
+            <div class="budget-stat-item">
+              <span class="budget-stat-label">Remaining</span>
+              <span class="budget-stat-val" id="budgetRemainingDisplay">₹0.00</span>
+            </div>
+            <div class="budget-stat-item">
+              <span class="budget-stat-label">Used</span>
+              <span class="budget-stat-val font-semibold" id="budgetPercentDisplay">0%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic Budget Alert Banner (>80% Warning) -->
+        <div id="budgetWarningAlert" class="budget-alert-banner hidden">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span id="budgetWarningText">Warning: You have used more than 80% of your monthly budget!</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. MAIN WORKFLOW: TWO-COLUMN LAYOUT (Add Expense Form + Expense List/Charts) -->
+    <div class="content-split-layout">
+      
+      <!-- LEFT COLUMN: EXPENSE ENTRY FORM -->
+      <aside class="form-column">
+        <div class="card form-card">
+          <div class="form-card-header">
+            <h2 id="formTitle" class="card-title">
+              <i class="fa-solid fa-circle-plus"></i> Add New Expense
+            </h2>
+            <p class="card-subtitle">Keep your records detailed and up-to-date</p>
+          </div>
+
+          <form id="expenseForm" class="expense-form" novalidate>
+            <!-- Hidden field for Edit Mode ID tracking -->
+            <input type="hidden" id="editExpenseId" value="">
+
+            <!-- Amount Input -->
+            <div class="form-group">
+              <label for="expenseAmount">Amount (₹) <span class="required">*</span></label>
+              <div class="input-with-icon">
+                <i class="fa-solid fa-indian-rupee-sign input-icon"></i>
+                <input 
+                  type="number" 
+                  id="expenseAmount" 
+                  name="expenseAmount"
+                  placeholder="e.g. 450" 
+                  min="0.01" 
+                  step="any"
+                  required
+                >
+              </div>
+              <small class="form-error" id="amountError"></small>
+            </div>
+
+            <!-- Category Select -->
+            <div class="form-group">
+              <label for="expenseCategory">Category <span class="required">*</span></label>
+              <div class="input-with-icon">
+                <i class="fa-solid fa-shapes input-icon"></i>
+                <select id="expenseCategory" name="expenseCategory" required>
+                  <option value="" disabled selected>Select Category</option>
+                  <option value="Food">🍔 Food</option>
+                  <option value="Travel">✈️ Travel</option>
+                  <option value="Shopping">🛍️ Shopping</option>
+                  <option value="Bills">💡 Bills</option>
+                  <option value="Entertainment">🎬 Entertainment</option>
+                  <option value="Health">💊 Health</option>
+                  <option value="Education">📚 Education</option>
+                  <option value="Other">✨ Other</option>
+                </select>
+              </div>
+              <small class="form-error" id="categoryError"></small>
+            </div>
+
+            <!-- Date Input -->
+            <div class="form-group">
+              <label for="expenseDate">Date <span class="required">*</span></label>
+              <div class="input-with-icon">
+                <i class="fa-solid fa-calendar-day input-icon"></i>
+                <input 
+                  type="date" 
+                  id="expenseDate" 
+                  name="expenseDate"
+                  required
+                >
+              </div>
+              <small class="form-error" id="dateError"></small>
+            </div>
+
+            <!-- Payment Method Select -->
+            <div class="form-group">
+              <label for="expensePayment">Payment Method <span class="required">*</span></label>
+              <div class="input-with-icon">
+                <i class="fa-solid fa-credit-card input-icon"></i>
+                <select id="expensePayment" name="expensePayment" required>
+                  <option value="" disabled selected>Select Payment Method</option>
+                  <option value="UPI">📱 UPI</option>
+                  <option value="Cash">💵 Cash</option>
+                  <option value="Debit Card">💳 Debit Card</option>
+                  <option value="Credit Card">💳 Credit Card</option>
+                  <option value="Other">🌐 Other</option>
+                </select>
+              </div>
+              <small class="form-error" id="paymentError"></small>
+            </div>
+
+            <!-- Description / Note Input -->
+            <div class="form-group">
+              <label for="expenseDescription">Description / Note <span class="text-muted">(Optional)</span></label>
+              <div class="input-with-icon">
+                <i class="fa-solid fa-pen input-icon"></i>
+                <input 
+                  type="text" 
+                  id="expenseDescription" 
+                  name="expenseDescription"
+                  placeholder="e.g. Grocery store run or Coffee" 
+                  maxlength="100"
+                >
+              </div>
+              <small class="form-error" id="descriptionError"></small>
+            </div>
+
+            <!-- Form Action Buttons -->
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary btn-block" id="submitExpenseBtn">
+                <i class="fa-solid fa-plus"></i> <span id="submitBtnText">Add Expense</span>
+              </button>
+              <button type="button" class="btn btn-secondary btn-block hidden" id="cancelEditBtn">
+                <i class="fa-solid fa-xmark"></i> Cancel Edit
+              </button>
+            </div>
+          </form>
+        </div>
+      </aside>
+
+      <!-- RIGHT COLUMN: ANALYTICS CHARTS & EXPENSE LIST -->
+      <section class="list-and-charts-column">
+        
+        <!-- VISUAL CHARTS SECTION -->
+        <div class="card charts-card">
+          <div class="charts-header">
+            <div>
+              <h2 class="card-title">
+                <i class="fa-solid fa-chart-simple"></i> Spending Analytics
+              </h2>
+              <p class="card-subtitle">Visual representation of your financial habits</p>
+            </div>
+          </div>
+          
+          <div class="charts-grid">
+            <!-- Category Doughnut Chart -->
+            <div class="chart-box">
+              <h3 class="chart-title">Breakdown by Category</h3>
+              <div class="chart-canvas-wrapper">
+                <canvas id="categoryChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Monthly / Trend Chart -->
+            <div class="chart-box">
+              <h3 class="chart-title">Monthly Spending Trend</h3>
+              <div class="chart-canvas-wrapper">
+                <canvas id="trendChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SEARCH, FILTERS & SORTING TOOLBAR -->
+        <div class="card toolbar-card">
+          <div class="toolbar-header">
+            <h2 class="card-title">
+              <i class="fa-solid fa-filter"></i> Search & Filters
+            </h2>
+            <button id="resetFiltersBtn" type="button" class="btn btn-outline btn-sm" title="Clear all filters">
+              <i class="fa-solid fa-rotate-left"></i> Reset
+            </button>
+          </div>
+
+          <div class="filter-controls-grid">
+            <!-- Search Text -->
+            <div class="filter-group filter-search">
+              <label for="searchInput">Search Note</label>
+              <div class="input-with-icon">
+                <i class="fa-solid fa-magnifying-glass input-icon"></i>
+                <input type="text" id="searchInput" placeholder="Search by note...">
+              </div>
+            </div>
+
+            <!-- Filter by Category -->
+            <div class="filter-group">
+              <label for="filterCategory">Category</label>
+              <select id="filterCategory">
+                <option value="ALL">All Categories</option>
+                <option value="Food">Food</option>
+                <option value="Travel">Travel</option>
+                <option value="Shopping">Shopping</option>
+                <option value="Bills">Bills</option>
+                <option value="Entertainment">Entertainment</option>
+                <option value="Health">Health</option>
+                <option value="Education">Education</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <!-- Filter by Payment Method -->
+            <div class="filter-group">
+              <label for="filterPayment">Payment Method</label>
+              <select id="filterPayment">
+                <option value="ALL">All Methods</option>
+                <option value="UPI">UPI</option>
+                <option value="Cash">Cash</option>
+                <option value="Debit Card">Debit Card</option>
+                <option value="Credit Card">Credit Card</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <!-- Filter by Month -->
+            <div class="filter-group">
+              <label for="filterMonth">Month</label>
+              <select id="filterMonth">
+                <option value="ALL">All Months</option>
+              </select>
+            </div>
+
+            <!-- Filter by Date -->
+            <div class="filter-group">
+              <label for="filterDate">Specific Date</label>
+              <input type="date" id="filterDate">
+            </div>
+
+            <!-- Sort By -->
+            <div class="filter-group">
+              <label for="sortBy">Sort By</label>
+              <select id="sortBy">
+                <option value="date-desc">Date: Newest First</option>
+                <option value="date-asc">Date: Oldest First</option>
+                <option value="amount-desc">Amount: High to Low</option>
+                <option value="amount-asc">Amount: Low to High</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- EXPENSE TRANSACTIONS LIST / TABLE -->
+        <div class="card expenses-card">
+          <div class="expenses-card-header">
+            <div>
+              <h2 class="card-title">
+                <i class="fa-solid fa-clock-rotate-left"></i> Expense History
+              </h2>
+              <p class="card-subtitle">
+                Showing <span id="filteredCountBadge" class="badge badge-accent">0</span> expenses
+              </p>
+            </div>
+            <div class="filtered-total-box" id="filteredTotalContainer">
+              <span class="filtered-total-label">Total:</span>
+              <span id="filteredTotalAmount" class="filtered-total-value">₹0.00</span>
+            </div>
+          </div>
+
+          <!-- Table Container -->
+          <div class="table-responsive">
+            <table class="expenses-table" id="expensesTable">
+              <thead>
+                <tr>
+                  <th>Category</th>
+                  <th>Description</th>
+                  <th>Date</th>
+                  <th>Payment</th>
+                  <th class="text-right">Amount</th>
+                  <th class="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="expensesTableBody">
+                <!-- Dynamically populated rows in Stage 2 -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Empty State (Shown when no expenses match or exist) -->
+          <div id="emptyState" class="empty-state">
+            <div class="empty-state-icon">
+              <i class="fa-solid fa-receipt"></i>
+            </div>
+            <h3 class="empty-state-title">No expenses found</h3>
+            <p class="empty-state-desc" id="emptyStateDesc">
+              You haven't recorded any expenses yet. Use the form on the left to add your first expense!
+            </p>
+          </div>
+        </div>
+
+      </section>
+    </div>
+  </main>
+
+  <!-- CONFIRMATION MODAL (For Safe Delete) -->
+  <div id="deleteModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-card">
+      <div class="modal-icon-danger">
+        <i class="fa-solid fa-trash-can"></i>
+      </div>
+      <h3 id="modalTitle" class="modal-title">Delete Expense</h3>
+      <p class="modal-desc">
+        Are you sure you want to delete this expense record? This action cannot be undone.
+      </p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" id="cancelDeleteBtn">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Yes, Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER (For user feedback alerts) -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <!-- Main JavaScript File -->
+  <script src="script.js?v=1.6"></script>
+</body>
+</html>
