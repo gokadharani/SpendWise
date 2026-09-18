@@ -1,3 +1,3 @@
 # SpendWise
-Smart personal expense tracker
+Smart personal expense tracker.
 Author- Dharani Goka
