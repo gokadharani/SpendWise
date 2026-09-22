@@ -43,10 +43,7 @@ const BUDGET_STORAGE_KEY = 'spendwise_budget';
 // ============================================================================
 // Caching references to DOM elements so we don't query the page repeatedly.
 
-// Theme elements
-const themeToggleBtn = document.getElementById('themeToggleBtn');
-const themeLabel = document.querySelector('.theme-label');
-const htmlElement = document.documentElement;
+
 
 // Expense Form elements
 const expenseForm = document.getElementById('expenseForm');
@@ -184,7 +181,7 @@ function getPreviousYearMonthString() {
   const now = new Date();
   let year = now.getFullYear();
   let month = now.getMonth(); // 0-indexed: 0 is January, 11 is December
-  
+
   if (month === 0) {
     // Current month is January -> previous month is December of previous year
     month = 12;
@@ -385,41 +382,6 @@ function showToast(message, type = 'info') {
   }, 3200);
 }
 
-// ============================================================================
-// 4. THEME TOGGLE (LIGHT / DARK)
-// ============================================================================
-
-function initTheme() {
-  const savedTheme = localStorage.getItem('spendwise_theme');
-  if (savedTheme) {
-    applyTheme(savedTheme);
-  } else {
-    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    applyTheme(prefersDark ? 'dark' : 'light');
-  }
-}
-
-function applyTheme(theme) {
-  htmlElement.setAttribute('data-theme', theme);
-  localStorage.setItem('spendwise_theme', theme);
-
-  if (theme === 'dark') {
-    if (themeLabel) themeLabel.textContent = 'Light Mode';
-    themeToggleBtn.setAttribute('title', 'Switch to Light Mode');
-  } else {
-    if (themeLabel) themeLabel.textContent = 'Dark Mode';
-    themeToggleBtn.setAttribute('title', 'Switch to Dark Mode');
-  }
-}
-
-function toggleTheme() {
-  const currentTheme = htmlElement.getAttribute('data-theme') || 'light';
-  const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-  applyTheme(newTheme);
-  showToast(`Switched to ${newTheme} mode`, 'info');
-}
-
-themeToggleBtn.addEventListener('click', toggleTheme);
 
 // ============================================================================
 // 5. STAGE 2: FORM VALIDATION
@@ -875,8 +837,8 @@ function getFilteredAndSortedExpenses() {
     if (selectedMonth && selectedMonth !== 'ALL') {
       if (!expense.date) return false;
       const expenseMonth = expense.date.substring(0, 7);
-      const isMatch = (expenseMonth === selectedMonth) || 
-                      (formatMonthYear(expenseMonth) === selectedMonth);
+      const isMatch = (expenseMonth === selectedMonth) ||
+        (formatMonthYear(expenseMonth) === selectedMonth);
       if (!isMatch) {
         return false;
       }
@@ -1465,8 +1427,7 @@ function escapeHtml(str) {
 // ============================================================================
 
 function initApp() {
-  // 1. Initialize Theme (Light / Dark)
-  initTheme();
+
 
   // 2. Set default date in the form
   const todayStr = getTodayDateString();
