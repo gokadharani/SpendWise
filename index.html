@@ -1,25 +1,29 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SpendWise | Modern Personal Expense Tracker</title>
-  <meta name="description" content="A modern, responsive personal expense tracker to record, manage, filter, and analyze your daily finances.">
-  
+  <meta name="description"
+    content="A modern, responsive personal expense tracker to record, manage, filter, and analyze your daily finances.">
+
   <!-- Google Fonts: Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
   <!-- Font Awesome 6 Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  
+
   <!-- Main Stylesheet -->
   <link rel="stylesheet" href="style.css?v=1.6">
-  
+
   <!-- Chart.js CDN (Loaded for analytics) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
+
 <body>
   <!-- Top Navigation / App Header -->
   <header class="app-header">
@@ -33,15 +37,16 @@
           <p class="brand-subtitle">Smart Personal Expense Tracker</p>
         </div>
       </div>
-      
+
       <div class="header-actions">
         <!-- Quick Currency Indicator -->
         <span class="currency-badge">
           <i class="fa-solid fa-indian-rupee-sign"></i> INR (₹)
         </span>
-        
+
         <!-- Theme Toggle Button (Light/Dark Mode) -->
-        <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="Toggle light and dark mode" title="Toggle Theme">
+        <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="Toggle light and dark mode"
+          title="Toggle Theme">
           <i class="fa-solid fa-moon theme-icon-moon"></i>
           <i class="fa-solid fa-sun theme-icon-sun"></i>
           <span class="theme-label">Dark Mode</span>
@@ -52,11 +57,11 @@
 
   <!-- Main Application Wrapper -->
   <main class="main-container">
-    
+
     <!-- 1. DASHBOARD KPI CARDS -->
     <section class="dashboard-section" aria-labelledby="dashboard-heading">
       <h2 id="dashboard-heading" class="sr-only">Financial Summary Dashboard</h2>
-      
+
       <div class="stats-grid">
         <!-- Stat Card: Total Expenses -->
         <div class="stat-card stat-total">
@@ -204,14 +209,7 @@
             <label for="monthlyBudgetInput" class="sr-only">Set Monthly Budget</label>
             <div class="budget-input-group">
               <span class="currency-symbol">₹</span>
-              <input 
-                type="number" 
-                id="monthlyBudgetInput" 
-                placeholder="Set monthly budget" 
-                min="0" 
-                step="any"
-                required
-              >
+              <input type="number" id="monthlyBudgetInput" placeholder="Set monthly budget" min="0" step="any" required>
               <button type="submit" class="btn btn-primary btn-sm" id="saveBudgetBtn">
                 <i class="fa-solid fa-check"></i> Set Budget
               </button>
@@ -254,7 +252,7 @@
 
     <!-- 3. MAIN WORKFLOW: TWO-COLUMN LAYOUT (Add Expense Form + Expense List/Charts) -->
     <div class="content-split-layout">
-      
+
       <!-- LEFT COLUMN: EXPENSE ENTRY FORM -->
       <aside class="form-column">
         <div class="card form-card">
@@ -274,15 +272,8 @@
               <label for="expenseAmount">Amount (₹) <span class="required">*</span></label>
               <div class="input-with-icon">
                 <i class="fa-solid fa-indian-rupee-sign input-icon"></i>
-                <input 
-                  type="number" 
-                  id="expenseAmount" 
-                  name="expenseAmount"
-                  placeholder="e.g. 450" 
-                  min="0.01" 
-                  step="any"
-                  required
-                >
+                <input type="number" id="expenseAmount" name="expenseAmount" placeholder="e.g. 450" min="0.01"
+                  step="any" required>
               </div>
               <small class="form-error" id="amountError"></small>
             </div>
@@ -312,12 +303,7 @@
               <label for="expenseDate">Date <span class="required">*</span></label>
               <div class="input-with-icon">
                 <i class="fa-solid fa-calendar-day input-icon"></i>
-                <input 
-                  type="date" 
-                  id="expenseDate" 
-                  name="expenseDate"
-                  required
-                >
+                <input type="date" id="expenseDate" name="expenseDate" required>
               </div>
               <small class="form-error" id="dateError"></small>
             </div>
@@ -344,13 +330,8 @@
               <label for="expenseDescription">Description / Note <span class="text-muted">(Optional)</span></label>
               <div class="input-with-icon">
                 <i class="fa-solid fa-pen input-icon"></i>
-                <input 
-                  type="text" 
-                  id="expenseDescription" 
-                  name="expenseDescription"
-                  placeholder="e.g. Grocery store run or Coffee" 
-                  maxlength="100"
-                >
+                <input type="text" id="expenseDescription" name="expenseDescription"
+                  placeholder="e.g. Grocery store run or Coffee" maxlength="100">
               </div>
               <small class="form-error" id="descriptionError"></small>
             </div>
@@ -370,7 +351,7 @@
 
       <!-- RIGHT COLUMN: ANALYTICS CHARTS & EXPENSE LIST -->
       <section class="list-and-charts-column">
-        
+
         <!-- VISUAL CHARTS SECTION -->
         <div class="card charts-card">
           <div class="charts-header">
@@ -381,7 +362,7 @@
               <p class="card-subtitle">Visual representation of your financial habits</p>
             </div>
           </div>
-          
+
           <div class="charts-grid">
             <!-- Category Doughnut Chart -->
             <div class="chart-box">
@@ -551,6 +532,8 @@
   <div id="toastContainer" class="toast-container" aria-live="polite"></div>
 
   <!-- Main JavaScript File -->
-  <script src="script.js?v=1.6"></script>
+  <script src="theme.js"></script>
+  <script src="script.js"></script>
 </body>
+
 </html>
