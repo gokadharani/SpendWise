@@ -74,6 +74,7 @@
 
 /* Dark Theme Overrides */
 [data-theme="dark"] {
+  color-scheme: dark;
   --bg-app: #090d16;
   --bg-card: #131b2e;
   --bg-card-hover: #19233c;
@@ -1494,4 +1495,16 @@ html[data-theme="dark"] #budgetWarningAlert.alert-danger i {
     right: 1rem;
     bottom: 1rem;
   }
+}
+
+/* Force native form popups to respect dark mode */
+[data-theme="dark"] select,
+[data-theme="dark"] input {
+  color-scheme: dark;
+}
+
+/* Explicitly style options to override native Windows black text */
+[data-theme="dark"] option {
+  background-color: var(--bg-input);
+  color: var(--text-primary);
 }
