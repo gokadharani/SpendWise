@@ -116,6 +116,9 @@ function escapeHtml(str) {
 function renderExpenses() {
   // Always update summary dashboard statistics from full expenses array
   if (typeof updateDashboard === 'function') updateDashboard();
+  if (typeof updateCategoryChart === 'function') updateCategoryChart();
+  if (typeof updateTrendChart === 'function') updateTrendChart();
+  if (typeof updatePaymentChart === 'function') updatePaymentChart();
 
   // Ensure Month filter options reflect current expense dates
   if (typeof checkAndSyncMonthFilter === 'function') checkAndSyncMonthFilter();
