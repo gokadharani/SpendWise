@@ -77,18 +77,19 @@ function getPaymentIcon(method) {
 }
 
 /**
- * Visually highlights the table row currently open in Edit Mode.
+ * Visually highlights the item currently open in Edit Mode.
  * 
  * @param {string|null} id
  */
 function highlightEditingRow(id) {
-  if (!typeof expensesTableBody !== 'undefined' && !expensesTableBody) return;
-  const rows = expensesTableBody.querySelectorAll('tr');
-  rows.forEach(tr => {
-    if (id && tr.getAttribute('data-id') === id) {
-      tr.classList.add('row-editing');
+  const list = document.getElementById('expensesList');
+  if (!list) return;
+  const rows = list.querySelectorAll('.transaction-item');
+  rows.forEach(item => {
+    if (id && item.getAttribute('data-id') === id) {
+      item.classList.add('row-editing');
     } else {
-      tr.classList.remove('row-editing');
+      item.classList.remove('row-editing');
     }
   });
 }
@@ -143,14 +144,14 @@ function renderExpenses() {
     filteredTotalAmount.textContent = formatCurrency(displayedTotal);
   }
 
-  const tableContainer = (typeof expensesTable !== 'undefined' && expensesTable) ? expensesTable.closest('.table-responsive') : null;
+  const listContainer = document.getElementById('expensesListContainer');
+  const expensesList = document.getElementById('expensesList');
 
   // Case 1: No expenses to display
   if (displayedExpenses.length === 0) {
     if (typeof emptyState !== 'undefined' && emptyState) emptyState.classList.remove('hidden');
-    if (tableContainer) tableContainer.classList.add('hidden');
-    if (typeof expensesTable !== 'undefined' && expensesTable) expensesTable.classList.add('hidden');
-    if (typeof expensesTableBody !== 'undefined' && expensesTableBody) expensesTableBody.innerHTML = '';
+    if (listContainer) listContainer.classList.add('hidden');
+    if (expensesList) expensesList.innerHTML = '';
 
     if (typeof emptyStateDesc !== 'undefined' && emptyStateDesc) {
       if (expenses.length === 0) {
@@ -162,93 +163,101 @@ function renderExpenses() {
     return;
   }
 
-  // Case 2: Expenses exist -> Hide Empty State, Show Table
+  // Case 2: Expenses exist -> Hide Empty State, Show List
   if (typeof emptyState !== 'undefined' && emptyState) emptyState.classList.add('hidden');
-  if (tableContainer) tableContainer.classList.remove('hidden');
-  if (typeof expensesTable !== 'undefined' && expensesTable) expensesTable.classList.remove('hidden');
+  if (listContainer) listContainer.classList.remove('hidden');
 
-  // Clear previous rows
-  if (typeof expensesTableBody !== 'undefined' && expensesTableBody) {
-    expensesTableBody.innerHTML = '';
+  if (expensesList) {
+    expensesList.innerHTML = '';
   }
 
-  // Loop through each displayed expense object and generate a table row <tr>
-  displayedExpenses.forEach((expense) => {
-    const tr = document.createElement('tr');
-    tr.setAttribute('data-id', expense.id);
+  // Group by date
+  const grouped = {};
+  const orderedDates = [];
+  displayedExpenses.forEach(exp => {
+    const d = exp.date || 'Unknown';
+    if (!grouped[d]) {
+      grouped[d] = [];
+      orderedDates.push(d);
+    }
+    grouped[d].push(exp);
+  });
 
-    // Escape HTML description safely to avoid XSS
-    const displayDesc = expense.description
-      ? escapeHtml(expense.description)
-      : '<span class="text-muted">—</span>';
+  // Helper for human readable date
+  const getHumanDate = (dateStr) => {
+    if (dateStr === 'Unknown') return dateStr;
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
-    tr.innerHTML = `
-      <!-- Category Pill -->
-      <td>
-        <span class="category-pill cat-${expense.category}">
-          <span>${getCategoryEmoji(expense.category)}</span>
-          <span>${expense.category}</span>
-        </span>
-      </td>
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
 
-      <!-- Description / Note -->
-      <td>
-        <span class="expense-desc-text">${displayDesc}</span>
-      </td>
+    if (dateStr === todayStr) return 'Today';
+    if (dateStr === yesterdayStr) return 'Yesterday';
+    return formatDate(dateStr);
+  };
 
-      <!-- Date -->
-      <td>
-        <span class="expense-date-text">${formatDate(expense.date)}</span>
-      </td>
+  // Render each date group
+  orderedDates.forEach(dateStr => {
+    const groupDiv = document.createElement('div');
+    groupDiv.className = 'transaction-date-group';
 
-      <!-- Payment Method Badge -->
-      <td>
-        <span class="payment-badge">
-          ${getPaymentIcon(expense.paymentMethod)}
-          <span>${expense.paymentMethod}</span>
-        </span>
-      </td>
+    const header = document.createElement('h4');
+    header.className = 'transaction-date-header';
+    header.textContent = getHumanDate(dateStr);
+    groupDiv.appendChild(header);
 
-      <!-- Amount -->
-      <td class="text-right">
-        <span class="amount-cell">${formatCurrency(expense.amount)}</span>
-      </td>
+    const itemsList = document.createElement('div');
+    itemsList.className = 'transaction-items';
 
-      <!-- Actions: Edit & Delete (Stage 3) -->
-      <td class="text-center">
-        <div class="action-buttons">
-          <button type="button" class="btn btn-icon btn-edit" title="Edit Expense" data-id="${expense.id}" aria-label="Edit expense">
-            <i class="fa-solid fa-pen-to-square"></i>
-          </button>
-          <button type="button" class="btn btn-icon btn-delete" title="Delete Expense" data-id="${expense.id}" aria-label="Delete expense">
-            <i class="fa-solid fa-trash-can"></i>
-          </button>
+    grouped[dateStr].forEach(expense => {
+      const item = document.createElement('div');
+      item.className = 'transaction-item';
+      item.setAttribute('data-id', expense.id);
+
+      const displayDesc = expense.description
+        ? escapeHtml(expense.description)
+        : '<span class="text-muted">—</span>';
+
+      item.innerHTML = `
+        <div class="transaction-left">
+          <div class="transaction-icon cat-${expense.category}">
+            ${getCategoryEmoji(expense.category)}
+          </div>
+          <div class="transaction-info">
+            <div class="transaction-desc">${displayDesc}</div>
+            <div class="transaction-meta">
+              <span>${expense.category}</span>
+              <span class="meta-dot">•</span>
+              <span>${getPaymentIcon(expense.paymentMethod)} ${expense.paymentMethod}</span>
+            </div>
+          </div>
         </div>
-      </td>
-    `;
+        <div class="transaction-right">
+          <div class="transaction-amount">${formatCurrency(expense.amount)}</div>
+          <i class="fa-solid fa-chevron-right transaction-chevron"></i>
+        </div>
+      `;
 
-    // Attach event listeners to action buttons
-    const editBtn = tr.querySelector('.btn-edit');
-    if (editBtn) {
-      editBtn.addEventListener('click', () => {
-          if (typeof startEdit === 'function') startEdit(expense.id);
+      // Highlight row if currently being edited
+      if (typeof editExpenseIdInput !== 'undefined' && editExpenseIdInput && editExpenseIdInput.value === expense.id) {
+        item.classList.add('row-editing');
+      }
+
+      // Attach click listener to open details modal
+      item.addEventListener('click', () => {
+        if (typeof openTransactionDetails === 'function') {
+          openTransactionDetails(expense.id);
+        }
       });
-    }
-    const deleteBtn = tr.querySelector('.btn-delete');
-    if (deleteBtn) {
-      deleteBtn.addEventListener('click', () => {
-          if (typeof promptDelete === 'function') promptDelete(expense.id);
-      });
-    }
 
-    // Highlight row if currently being edited
-    if (typeof editExpenseIdInput !== 'undefined' && editExpenseIdInput && editExpenseIdInput.value === expense.id) {
-      tr.classList.add('row-editing');
-    }
+      itemsList.appendChild(item);
+    });
 
-    // Append this row to the table body
-    if (typeof expensesTableBody !== 'undefined' && expensesTableBody) {
-      expensesTableBody.appendChild(tr);
+    groupDiv.appendChild(itemsList);
+    if (expensesList) {
+      expensesList.appendChild(groupDiv);
     }
   });
 }

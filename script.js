@@ -38,6 +38,12 @@ const deleteModal = document.getElementById('deleteModal');
 const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
 const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
 
+const detailsModal = document.getElementById('detailsModal');
+const closeDetailsBtn = document.getElementById('closeDetailsBtn');
+const detailsModalContent = document.getElementById('detailsModalContent');
+const detailsEditBtn = document.getElementById('detailsEditBtn');
+const detailsDeleteBtn = document.getElementById('detailsDeleteBtn');
+
 const expensesTable = document.getElementById('expensesTable');
 const expensesTableBody = document.getElementById('expensesTableBody');
 const emptyState = document.getElementById('emptyState');
@@ -159,7 +165,67 @@ function showToast(message, type = 'info') {
 }
 
 // ============================================================================
-// 4. APPLICATION INITIALIZATION
+// 4. TRANSACTION DETAILS
+// ============================================================================
+
+function openTransactionDetails(id) {
+  const expense = expenses.find(item => item.id === id);
+  if (!expense) return;
+
+  if (detailsModalContent) {
+    const descHTML = expense.description ? `
+        <div class="details-row">
+          <div class="details-label">Notes</div>
+          <div class="details-value">${escapeHtml(expense.description)}</div>
+        </div>
+    ` : '';
+
+    detailsModalContent.innerHTML = `
+      <div class="details-view-content">
+        <div class="details-amount-large">${formatCurrency(expense.amount)}</div>
+
+        ${descHTML}
+
+        <div class="details-row">
+          <div class="details-label">Category</div>
+          <div class="details-value">
+            <span class="category-pill cat-${expense.category}">
+              <span>${getCategoryEmoji(expense.category)}</span>
+              <span>${expense.category}</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="details-row">
+          <div class="details-label">Date</div>
+          <div class="details-value">${formatDate(expense.date)}</div>
+        </div>
+
+        <div class="details-row">
+          <div class="details-label">Payment Method</div>
+          <div class="details-value">
+            <span class="payment-badge">
+              ${getPaymentIcon(expense.paymentMethod)}
+              <span>${expense.paymentMethod}</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  if (detailsEditBtn) detailsEditBtn.setAttribute('data-id', id);
+  if (detailsDeleteBtn) detailsDeleteBtn.setAttribute('data-id', id);
+
+  if (detailsModal) detailsModal.classList.remove('hidden');
+}
+
+function closeTransactionDetails() {
+  if (detailsModal) detailsModal.classList.add('hidden');
+}
+
+// ============================================================================
+// 5. APPLICATION INITIALIZATION
 // ============================================================================
 
 function initApp() {
@@ -214,10 +280,47 @@ function initApp() {
     });
   }
 
+  if (detailsModal) {
+    detailsModal.addEventListener('click', (e) => {
+      if (e.target === detailsModal) {
+        closeTransactionDetails();
+      }
+    });
+  }
+
+  if (closeDetailsBtn) {
+    closeDetailsBtn.addEventListener('click', closeTransactionDetails);
+  }
+
+  if (detailsEditBtn) {
+    detailsEditBtn.addEventListener('click', (e) => {
+      const id = e.currentTarget.getAttribute('data-id');
+      if (id && typeof startEdit === 'function') {
+        closeTransactionDetails();
+        startEdit(id);
+      }
+    });
+  }
+
+  if (detailsDeleteBtn) {
+    detailsDeleteBtn.addEventListener('click', (e) => {
+      const id = e.currentTarget.getAttribute('data-id');
+      if (id && typeof promptDelete === 'function') {
+        closeTransactionDetails();
+        promptDelete(id);
+      }
+    });
+  }
+
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && deleteModal && !deleteModal.classList.contains('hidden')) {
-      deleteModal.classList.add('hidden');
-      if (typeof pendingDeleteId !== 'undefined') pendingDeleteId = null;
+    if (e.key === 'Escape') {
+      if (deleteModal && !deleteModal.classList.contains('hidden')) {
+        deleteModal.classList.add('hidden');
+        if (typeof pendingDeleteId !== 'undefined') pendingDeleteId = null;
+      }
+      if (detailsModal && !detailsModal.classList.contains('hidden')) {
+        closeTransactionDetails();
+      }
     }
   });
 
@@ -231,11 +334,30 @@ function initApp() {
     filterPayment.addEventListener('change', renderExpenses);
   }
   if (filterMonth && typeof renderExpenses === 'function') {
-    filterMonth.addEventListener('change', renderExpenses);
+    const handleMonthChange = () => {
+      if (filterMonth.value !== 'ALL' && filterMonth.value !== '') {
+        if (filterDate && filterDate.value !== '') {
+          filterDate.value = '';
+          filterDate.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }
+      renderExpenses();
+    };
+    filterMonth.addEventListener('input', handleMonthChange);
+    filterMonth.addEventListener('change', handleMonthChange);
   }
   if (filterDate && typeof renderExpenses === 'function') {
-    filterDate.addEventListener('input', renderExpenses);
-    filterDate.addEventListener('change', renderExpenses);
+    const handleDateChange = () => {
+      if (filterDate.value !== '') {
+        if (filterMonth && filterMonth.value !== 'ALL') {
+          filterMonth.value = 'ALL';
+          filterMonth.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }
+      renderExpenses();
+    };
+    filterDate.addEventListener('input', handleDateChange);
+    filterDate.addEventListener('change', handleDateChange);
   }
   if (sortBy && typeof renderExpenses === 'function') {
     sortBy.addEventListener('change', renderExpenses);

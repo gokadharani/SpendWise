@@ -24,7 +24,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 
-<body>
+<body data-mobile-view="home">
   <!-- Top Navigation / App Header -->
   <header class="app-header">
     <div class="header-container">
@@ -443,15 +443,19 @@
             <!-- Filter by Month -->
             <div class="filter-group">
               <label for="filterMonth">Month</label>
-              <select id="filterMonth">
-                <option value="ALL">All Months</option>
-              </select>
+              <div class="input-with-icon">
+                <i class="fa-solid fa-calendar-minus input-icon"></i>
+                <input type="text" id="filterMonth" placeholder="Search month...">
+              </div>
             </div>
 
             <!-- Filter by Date -->
             <div class="filter-group">
               <label for="filterDate">Specific Date</label>
-              <input type="date" id="filterDate">
+              <div class="input-with-icon">
+                <i class="fa-solid fa-calendar-day input-icon"></i>
+                <input type="text" id="filterDate" placeholder="Search date...">
+              </div>
             </div>
 
             <!-- Sort By -->
@@ -484,23 +488,11 @@
             </div>
           </div>
 
-          <!-- Table Container -->
-          <div class="table-responsive">
-            <table class="expenses-table" id="expensesTable">
-              <thead>
-                <tr>
-                  <th>Category</th>
-                  <th>Description</th>
-                  <th>Date</th>
-                  <th>Payment</th>
-                  <th class="text-right">Amount</th>
-                  <th class="text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="expensesTableBody">
-                <!-- Dynamically populated rows in Stage 2 -->
-              </tbody>
-            </table>
+          <!-- Expenses List Container -->
+          <div class="table-responsive" id="expensesListContainer">
+            <div id="expensesList" class="transaction-history">
+              <!-- Dynamically populated transaction cards -->
+            </div>
           </div>
 
           <!-- Empty State (Shown when no expenses match or exist) -->
@@ -536,10 +528,61 @@
     </div>
   </div>
 
+  <!-- TRANSACTION DETAILS MODAL (Phase 2) -->
+  <div id="detailsModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="detailsModalTitle">
+    <div class="modal-card details-modal-card">
+      <div class="details-modal-header">
+        <h3 id="detailsModalTitle" class="modal-title">Transaction Details</h3>
+        <button type="button" class="btn-icon btn-close-modal" id="closeDetailsBtn" aria-label="Close details">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="details-modal-content" id="detailsModalContent">
+        <!-- Content injected dynamically -->
+      </div>
+
+      <div class="modal-actions details-modal-actions">
+        <button type="button" class="btn btn-outline" id="detailsEditBtn">
+          <i class="fa-solid fa-pen-to-square"></i> Edit
+        </button>
+        <button type="button" class="btn btn-danger" id="detailsDeleteBtn">
+          <i class="fa-solid fa-trash-can"></i> Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST NOTIFICATION CONTAINER (For user feedback alerts) -->
   <div id="toastContainer" class="toast-container" aria-live="polite"></div>
 
+  <!-- MOBILE BOTTOM NAVIGATION -->
+  <nav class="mobile-bottom-nav">
+    <button class="nav-item active" data-target="home">
+      <i class="fa-solid fa-house"></i>
+      <span>Home</span>
+    </button>
+    <button class="nav-item" data-target="history">
+      <i class="fa-solid fa-list"></i>
+      <span>History</span>
+    </button>
+    <button class="nav-item" data-target="add">
+      <div class="nav-fab">
+        <i class="fa-solid fa-plus"></i>
+      </div>
+    </button>
+    <button class="nav-item" data-target="analytics">
+      <i class="fa-solid fa-chart-pie"></i>
+      <span>Analytics</span>
+    </button>
+    <button class="nav-item" data-target="settings">
+      <i class="fa-solid fa-gear"></i>
+      <span>Settings</span>
+    </button>
+  </nav>
+
   <script src="theme.js"></script>
+  <script src="navigation.js"></script>
   <script src="script.js"></script>
   <script src="storage.js"></script>
   <script src="filters.js"></script>

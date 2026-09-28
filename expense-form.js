@@ -4,7 +4,7 @@
 
 /**
  * Handles form submission for both Adding new expenses and Updating existing ones.
- * 
+ *
  * @param {Event} event - Form submit event
  */
 function handleFormSubmit(event) {
@@ -37,8 +37,19 @@ function handleFormSubmit(event) {
 
     if (updated) {
       if (typeof renderExpenses === 'function') renderExpenses();
-      cancelEdit();
+      cancelEdit(true);
       if (typeof showToast === 'function') showToast('Expense updated successfully!', 'success');
+
+      setTimeout(() => {
+        const updatedItem = document.querySelector(`.transaction-item[data-id="${editId}"]`);
+        if (updatedItem) {
+          updatedItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          updatedItem.classList.add('row-editing');
+          setTimeout(() => {
+            if (updatedItem) updatedItem.classList.remove('row-editing');
+          }, 1500);
+        }
+      }, 100);
     } else {
       if (typeof showToast === 'function') showToast('Error: Expense record not found.', 'danger');
     }
@@ -82,7 +93,7 @@ function resetExpenseForm() {
  * Starts editing an existing expense.
  * Loads the existing values into the form, clearly indicates Edit Mode,
  * changes button to "Update Expense", and shows the Cancel Edit button.
- * 
+ *
  * @param {string} id - Unique ID of the expense to edit
  */
 function startEdit(id) {
@@ -122,17 +133,27 @@ function startEdit(id) {
   // Visually highlight active editing row
   if (typeof highlightEditingRow === 'function') highlightEditingRow(expense.id);
 
+  // If on mobile, switch to the add (form) view
+  if (typeof window.switchMobileView === 'function') {
+    window.switchMobileView('add');
+  }
+
   // Scroll to form and focus amount input
   if (typeof expenseForm !== 'undefined' && expenseForm) {
-    expenseForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // A small timeout allows the DOM to render the display:block change on mobile
+    setTimeout(() => {
+      expenseForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (typeof expenseAmountInput !== 'undefined' && expenseAmountInput) expenseAmountInput.focus();
+    }, 50);
+  } else if (typeof expenseAmountInput !== 'undefined' && expenseAmountInput) {
+    expenseAmountInput.focus();
   }
-  if (typeof expenseAmountInput !== 'undefined' && expenseAmountInput) expenseAmountInput.focus();
 }
 
 /**
  * Updates an existing expense object in the `expenses` array.
  * Keeps the same expense ID and does NOT create duplicates.
- * 
+ *
  * @param {string} id - The expense ID to update
  * @param {object} updatedData - The modified values
  * @returns {boolean} true if found and updated
@@ -157,8 +178,10 @@ function editExpense(id, updatedData) {
 /**
  * Leaves Edit Mode without saving changes.
  * Reverts form title, button labels, clears inputs, and hides Cancel Edit button.
+ *
+ * @param {boolean|Event} returnToHistory - If true or an Event object, navigates back to History
  */
-function cancelEdit() {
+function cancelEdit(returnToHistory = false) {
   if (typeof editExpenseIdInput !== 'undefined' && editExpenseIdInput) {
     editExpenseIdInput.value = '';
   }
@@ -181,4 +204,11 @@ function cancelEdit() {
 
   // Clear row highlight
   if (typeof highlightEditingRow === 'function') highlightEditingRow(null);
+
+  // Return to history if requested (via true or event object from click)
+  if (returnToHistory === true || (returnToHistory && typeof returnToHistory.preventDefault === 'function')) {
+    if (typeof window.switchMobileView === 'function') {
+      window.switchMobileView('history');
+    }
+  }
 }

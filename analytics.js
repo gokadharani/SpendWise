@@ -46,10 +46,10 @@ function updateCategoryChart() {
 
   // Aggregate expenses by category
   const categoryTotals = {};
-  expenses.forEach(function(exp) {
+  expenses.forEach(function (exp) {
     const category = exp.category || 'Uncategorized';
     const amount = Number(exp.amount) || 0;
-    
+
     // Only aggregate valid positive expenses
     if (amount > 0) {
       if (categoryTotals[category]) {
@@ -115,11 +115,11 @@ function updateCategoryChart() {
         },
         tooltip: {
           callbacks: {
-            label: function(context) {
+            label: function (context) {
               const label = context.label || '';
               const value = context.raw || 0;
-              const formattedValue = (typeof formatCurrency === 'function') 
-                ? formatCurrency(value) 
+              const formattedValue = (typeof formatCurrency === 'function')
+                ? formatCurrency(value)
                 : ('\u20B9' + value.toFixed(2));
               return ' ' + label + ': ' + formattedValue;
             }
@@ -176,7 +176,7 @@ function updateTrendChart() {
 
   // Aggregate expenses by month (YYYY-MM)
   const monthlyTotals = {};
-  expenses.forEach(function(exp) {
+  expenses.forEach(function (exp) {
     const amount = Number(exp.amount) || 0;
     if (amount > 0 && exp.date) {
       const monthStr = exp.date.substring(0, 7); // Extracts 'YYYY-MM'
@@ -190,7 +190,7 @@ function updateTrendChart() {
 
   // Sort the aggregated months chronologically (oldest to newest)
   const months = Object.keys(monthlyTotals).sort();
-  
+
   // If we have expenses but they are all 0 or negative/invalid date
   if (months.length === 0) {
     const ctx = canvas.getContext('2d');
@@ -219,14 +219,14 @@ function updateTrendChart() {
   }
 
   // Format labels nicely (e.g., 'YYYY-MM' -> 'Jan 2026') using existing helper if available
-  const formattedLabels = months.map(function(m) {
+  const formattedLabels = months.map(function (m) {
     if (typeof formatMonthYear === 'function') {
       return formatMonthYear(m);
     }
     return m;
   });
 
-  const data = months.map(function(m) { return monthlyTotals[m]; });
+  const data = months.map(function (m) { return monthlyTotals[m]; });
 
   // Render the real line chart
   const ctx = canvas.getContext('2d');
@@ -256,10 +256,10 @@ function updateTrendChart() {
         legend: { display: false },
         tooltip: {
           callbacks: {
-            label: function(context) {
+            label: function (context) {
               const value = context.raw || 0;
-              const formattedValue = (typeof formatCurrency === 'function') 
-                ? formatCurrency(value) 
+              const formattedValue = (typeof formatCurrency === 'function')
+                ? formatCurrency(value)
                 : ('\u20B9' + value.toFixed(2));
               return ' ' + formattedValue;
             }
@@ -273,9 +273,9 @@ function updateTrendChart() {
         y: {
           beginAtZero: true,
           ticks: {
-            callback: function(value) {
-              return (typeof formatCurrency === 'function') 
-                ? formatCurrency(value) 
+            callback: function (value) {
+              return (typeof formatCurrency === 'function')
+                ? formatCurrency(value)
                 : ('\u20B9' + value);
             }
           }
@@ -326,10 +326,10 @@ function updatePaymentChart() {
 
   // Aggregate expenses by payment method
   const paymentTotals = {};
-  expenses.forEach(function(exp) {
+  expenses.forEach(function (exp) {
     const method = exp.paymentMethod || 'Uncategorized';
     const amount = Number(exp.amount) || 0;
-    
+
     // Only aggregate valid positive expenses
     if (amount > 0) {
       if (paymentTotals[method]) {
@@ -395,11 +395,11 @@ function updatePaymentChart() {
         },
         tooltip: {
           callbacks: {
-            label: function(context) {
+            label: function (context) {
               const label = context.label || '';
               const value = context.raw || 0;
-              const formattedValue = (typeof formatCurrency === 'function') 
-                ? formatCurrency(value) 
+              const formattedValue = (typeof formatCurrency === 'function')
+                ? formatCurrency(value)
                 : ('\u20B9' + value.toFixed(2));
               return ' ' + label + ': ' + formattedValue;
             }
