@@ -509,6 +509,51 @@
 
       </section>
     </div>
+
+    <!-- 5. SETTINGS SECTION -->
+    <section class="settings-section hidden-desktop" aria-labelledby="settings-heading">
+      <div class="settings-header">
+        <h2 id="settings-heading" class="settings-title">
+          <i class="fa-solid fa-gear"></i> Settings
+        </h2>
+        <p class="settings-subtitle">Manage your SpendWise preferences</p>
+      </div>
+      
+      <div class="settings-cards-grid">
+        <!-- Appearance -->
+        <div class="card settings-card">
+          <h3 class="card-title">Appearance</h3>
+          <p class="card-subtitle">Theme and styling options</p>
+          <div class="settings-item">
+            <span class="settings-label">Theme</span>
+            <span class="settings-value">Use header button to toggle</span>
+          </div>
+        </div>
+
+        <!-- Preferences -->
+        <div class="card settings-card">
+          <h3 class="card-title">Preferences</h3>
+          <p class="card-subtitle">App behavior and formats</p>
+          <div class="settings-item">
+            <span class="settings-label">Currency</span>
+            <span class="settings-value">INR (₹)</span>
+          </div>
+        </div>
+
+        <!-- Data Management -->
+        <div class="card settings-card">
+          <h3 class="card-title">Data Management</h3>
+          <p class="card-subtitle">Export, import, and clear your data</p>
+          <div class="settings-actions">
+            <button id="exportDataBtn" class="btn btn-outline btn-block"><i class="fa-solid fa-file-export"></i> Export Data</button>
+            <button id="importDataBtn" class="btn btn-outline btn-block"><i class="fa-solid fa-file-import"></i> Import Data</button>
+            <button id="clearAllDataBtn" class="btn btn-danger btn-block"><i class="fa-solid fa-trash-can"></i> Clear All Data</button>
+          </div>
+          <input type="file" id="importDataInput" accept=".json,application/json" class="hidden">
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <!-- CONFIRMATION MODAL (For Safe Delete) -->
@@ -529,7 +574,8 @@
   </div>
 
   <!-- TRANSACTION DETAILS MODAL (Phase 2) -->
-  <div id="detailsModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="detailsModalTitle">
+  <div id="detailsModal" class="modal-backdrop hidden" role="dialog" aria-modal="true"
+    aria-labelledby="detailsModalTitle">
     <div class="modal-card details-modal-card">
       <div class="details-modal-header">
         <h3 id="detailsModalTitle" class="modal-title">Transaction Details</h3>
@@ -593,6 +639,7 @@
   <script src="expense-form.js"></script>
   <script src="expense-delete.js"></script>
   <script src="analytics.js"></script>
+  <script src="settings.js"></script>
 </body>
 
 </html>

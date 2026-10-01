@@ -54,17 +54,6 @@ document.addEventListener('DOMContentLoaded', () => {
       
       const target = item.getAttribute('data-target');
       if (target && target !== currentView) {
-        // If settings is clicked (which is a placeholder right now)
-        if (target === 'settings') {
-          // Temporarily just show a toast if available
-          if (typeof showToast === 'function') {
-            showToast('Settings view coming soon!', 'info');
-          } else {
-            alert('Settings view coming soon!');
-          }
-          return;
-        }
-
         if (target === 'add' && typeof cancelEdit === 'function') {
           cancelEdit();
         }
