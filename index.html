@@ -33,60 +33,8 @@
   <!-- Main Application Wrapper -->
   <main class="main-container">
 
-    <!-- 1. DASHBOARD KPI CARDS -->
-    <section class="dashboard-section" aria-labelledby="dashboard-heading">
-      <h2 id="dashboard-heading" class="sr-only">Financial Summary Dashboard</h2>
-
-      <div class="stats-grid">
-        <!-- Stat Card: Total Expenses -->
-        <div class="stat-card stat-total">
-          <div class="stat-icon-wrapper">
-            <i class="fa-solid fa-coins"></i>
-          </div>
-          <div class="stat-info">
-            <span class="stat-label">Total Expenses</span>
-            <h3 class="stat-value" id="totalExpensesDisplay">₹0.00</h3>
-            <span class="stat-meta">Lifetime logged</span>
-          </div>
-        </div>
-
-        <!-- Stat Card: This Month's Expenses -->
-        <div class="stat-card stat-month">
-          <div class="stat-icon-wrapper">
-            <i class="fa-solid fa-calendar-days"></i>
-          </div>
-          <div class="stat-info">
-            <span class="stat-label">This Month</span>
-            <h3 class="stat-value" id="monthExpensesDisplay">₹0.00</h3>
-            <span class="stat-meta" id="currentMonthLabel">Current Month</span>
-          </div>
-        </div>
-
-        <!-- Stat Card: Transactions Count -->
-        <div class="stat-card stat-count">
-          <div class="stat-icon-wrapper">
-            <i class="fa-solid fa-receipt"></i>
-          </div>
-          <div class="stat-info">
-            <span class="stat-label">Transactions</span>
-            <h3 class="stat-value" id="transactionCountDisplay">0</h3>
-            <span class="stat-meta">Recorded entries</span>
-          </div>
-        </div>
-
-        <!-- Stat Card: Highest Category -->
-        <div class="stat-card stat-top-category">
-          <div class="stat-icon-wrapper">
-            <i class="fa-solid fa-chart-pie"></i>
-          </div>
-          <div class="stat-info">
-            <span class="stat-label">Top Spending</span>
-            <h3 class="stat-value" id="topCategoryDisplay">None</h3>
-            <span class="stat-meta" id="topCategoryAmount">₹0.00 spent</span>
-          </div>
-        </div>
-      </div>
-    </section>
+    <!-- 1. DASHBOARD KPI CARDS (React Mount Point) -->
+    <div id="react-dashboard-root"></div>
 
     <!-- 2. DAILY EXPENSES SUMMARY (YESTERDAY & TODAY) -->
     <section class="daily-summary-section" aria-label="Daily Spending Summary">
