@@ -1,29 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import StatCard from './StatCard';
 
-const DashboardStats = () => {
-  const [expenses, setExpenses] = useState([]);
-
-  // Poll localStorage for expenses to stay in sync with the vanilla JS app during migration
-  useEffect(() => {
-    const fetchExpenses = () => {
-      try {
-        const savedData = localStorage.getItem('spendwise_expenses') || localStorage.getItem('expenses');
-        if (savedData) {
-          const parsed = JSON.parse(savedData);
-          if (Array.isArray(parsed)) {
-            setExpenses(parsed);
-          }
-        }
-      } catch (e) {
-        console.error('Error parsing expenses in React:', e);
-      }
-    };
-
-    fetchExpenses(); // initial load
-    const interval = setInterval(fetchExpenses, 500);
-    return () => clearInterval(interval);
-  }, []);
+const DashboardStats = ({ expenses = [] }) => {
 
   // Format currency helper
   const formatCurrency = (amount) => {

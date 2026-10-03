@@ -47,6 +47,7 @@ function deleteExpense(id) {
 
   if (expenses.length < initialLength) {
     if (typeof saveExpenses === 'function') saveExpenses(); // Persist to LocalStorage on Delete
+    if (window.refreshReactExpenses) window.refreshReactExpenses();
     if (typeof renderExpenses === 'function') renderExpenses();
     if (typeof showToast === 'function') showToast('Expense deleted successfully', 'success');
   }

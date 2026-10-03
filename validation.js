@@ -90,30 +90,38 @@ function validateExpenseForm() {
 
 // Clear individual error as soon as the user starts typing or selecting
 
-validationAmountInput.addEventListener('input', () => {
-    validationAmountError.textContent = '';
-    validationAmountInput.style.borderColor = '';
-});
+if (validationAmountInput) {
+    validationAmountInput.addEventListener('input', () => {
+        validationAmountError.textContent = '';
+        validationAmountInput.style.borderColor = '';
+    });
+}
 
-validationCategoryInput.addEventListener('change', () => {
-    validationCategoryError.textContent = '';
-    validationCategoryInput.style.borderColor = '';
-});
+if (validationCategoryInput) {
+    validationCategoryInput.addEventListener('change', () => {
+        validationCategoryError.textContent = '';
+        validationCategoryInput.style.borderColor = '';
+    });
+}
 
-validationDateInput.addEventListener('input', () => {
-    validationDateError.textContent = '';
-    validationDateInput.style.borderColor = '';
-});
+if (validationDateInput) {
+    validationDateInput.addEventListener('input', () => {
+        validationDateError.textContent = '';
+        validationDateInput.style.borderColor = '';
+    });
 
-validationDateInput.addEventListener('change', () => {
-    validationDateError.textContent = '';
-    validationDateInput.style.borderColor = '';
-});
+    validationDateInput.addEventListener('change', () => {
+        validationDateError.textContent = '';
+        validationDateInput.style.borderColor = '';
+    });
+}
 
-validationPaymentInput.addEventListener('change', () => {
-    validationPaymentError.textContent = '';
-    validationPaymentInput.style.borderColor = '';
-});
+if (validationPaymentInput) {
+    validationPaymentInput.addEventListener('change', () => {
+        validationPaymentError.textContent = '';
+        validationPaymentInput.style.borderColor = '';
+    });
+}
 
 // Make validation functions available to script.js
 window.validateExpenseForm = validateExpenseForm;
