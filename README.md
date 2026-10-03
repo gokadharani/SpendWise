@@ -1,13 +1,13 @@
 # SpendWise
 Smart Personal Expense Tracker
 
-SpendWise is a responsive personal expense tracking web application that helps users record, manage, filter, and analyze their daily expenses.
+SpendWise is a responsive personal expense tracking web application that helps users record, manage, filter, and analyze their daily expenses. It has recently been fully migrated to a clean, component-based React architecture.
 
 ## Features
 - Add new expenses
 - Edit existing expenses
 - Delete expenses
-- Store expenses using browser LocalStorage
+- Store expenses using browser localStorage
 - Search expenses
 - Filter expenses by month and category
 - Sort expenses
@@ -17,66 +17,92 @@ SpendWise is a responsive personal expense tracking web application that helps u
 - Set and track a monthly budget
 - View spending analytics and charts
 - Responsive design for desktop and mobile devices
-- Modular JavaScript structure for easier maintenance
+- Settings for exporting, importing, and clearing data
+- Form validation and Toast notifications
+- Dark/light mode theme toggling
+- Mobile bottom navigation
 
 ## Technologies Used
+- React
+- Vite
+- JavaScript (ES6+)
 - HTML5
 - CSS3
-- JavaScript (ES6+)
-- Chart.js
-- Font Awesome
-- LocalStorage API
+- Chart.js / react-chartjs-2
+- Browser localStorage API
+
+## React Architecture
+The application has been fully migrated from Vanilla JavaScript to a modern React stack. The UI, logic, and state management have been re-architected into modular, reusable React components. 
+
+Core Components include:
+- `App.jsx` - Main state container and layout orchestrator.
+- `ExpenseForm.jsx` - Form to add and edit expenses.
+- `ExpenseHistory.jsx` - Displays the categorized list of transactions.
+- `Header.jsx` - Top navigation and theme toggling.
+- `DashboardStats.jsx` - Top-level financial summaries.
+- `AnalyticsCharts.jsx` - Integration with Chart.js to visualize spending.
+- `BudgetSection.jsx` - Budget planner and progress bar.
+- `SearchFilters.jsx` - Controls for searching and sorting data.
+- `SettingsSection.jsx` - Data export/import and reset functionality.
+- `MobileNavigation.jsx` - Bottom navigation bar for mobile views.
+- `Modals.jsx` - Confirmation and detail view modals.
+- `ToastContainer.jsx` - Custom notification system.
+- `DailyMonthlySummary.jsx` - Additional summarized metrics.
 
 ## Project Structure
 ```
 SpendWise/
 ├── index.html
+├── package.json
 ├── style.css
-├── script.js
-├── theme.js
-├── navigation.js
-├── storage.js
-├── filters.js
-├── dashboard.js
-├── budget.js
-├── render.js
-├── validation.js
-├── expense-form.js
-├── expense-delete.js
-├── analytics.js
-└── README.md
+└── src/
+    ├── main.jsx
+    ├── App.jsx
+    ├── utils.js
+    └── components/
+        ├── AnalyticsCharts.jsx
+        ├── BudgetSection.jsx
+        ├── DailyMonthlySummary.jsx
+        ├── DashboardStats.jsx
+        ├── ExpenseForm.jsx
+        ├── ExpenseHistory.jsx
+        ├── Header.jsx
+        ├── MobileNavigation.jsx
+        ├── Modals.jsx
+        ├── SearchFilters.jsx
+        ├── SettingsSection.jsx
+        ├── StatCard.jsx
+        └── ToastContainer.jsx
 ```
 
 ## How to Run
+
 1. Clone or download the repository.
-2. Open the project folder.
-3. Start a local server, for example:
+2. Open the project folder in your terminal.
+3. Install the dependencies:
    ```bash
-   python -m http.server 8080
+   npm install
    ```
-4. Open http://localhost:8080 in your browser.
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
+5. Open the displayed local URL in your browser.
+
+To verify the production build, run:
+```bash
+npm run build
+```
 
 ## Data Storage
-SpendWise currently stores expense data in the browser's LocalStorage. This means the data is stored locally on the user's device/browser and does not require a backend database.
+SpendWise stores expense data in the browser's `localStorage` under the `spendwise_expenses` key (and `spendwise_budget` for the budget). This means the data is stored locally on the user's device/browser and does not require a backend database.
 
 ## Future Improvements
 - Multiple currency support
 - Global/localized currency handling
 - User authentication
 - Backend/database integration
-- React-based component architecture
 - Improved analytics and reporting
-- Deployment as a production web application
-
-## Learning Goals
-This project is also being developed as a learning project to improve practical skills in:
-- JavaScript
-- DOM manipulation
-- Responsive web design
-- LocalStorage
-- Git and GitHub
-- Modular code organization
-- Web application development
 
 ## Author
 Dharani Goka
