@@ -9,6 +9,7 @@ import SearchFilters from './components/SearchFilters';
 import ExpenseHistory from './components/ExpenseHistory';
 import SettingsSection from './components/SettingsSection';
 import MobileNavigation from './components/MobileNavigation';
+import DesktopNavigation from './components/DesktopNavigation';
 import { DeleteModal, DetailsModal } from './components/Modals';
 import ToastContainer from './components/ToastContainer';
 import { formatMonthYear } from './utils';
@@ -29,6 +30,9 @@ const App = () => {
 
   // Mobile View state
   const [activeView, setActiveView] = useState('home');
+
+  // Desktop View state
+  const [desktopView, setDesktopView] = useState('dashboard');
 
   // Modal states
   const [detailsExpenseId, setDetailsExpenseId] = useState(null);
@@ -60,6 +64,10 @@ const App = () => {
   useEffect(() => {
     document.body.setAttribute('data-mobile-view', activeView);
   }, [activeView]);
+
+  useEffect(() => {
+    document.body.setAttribute('data-desktop-view', desktopView);
+  }, [desktopView]);
 
   const showToast = (message, type = 'info') => {
     const id = Date.now() + Math.random();
@@ -108,6 +116,7 @@ const App = () => {
       setHistoryScrollPos(window.scrollY);
       setExpenseToEdit(exp);
       setActiveView('add'); // switch to form on mobile
+      setDesktopView('add'); // switch to form on desktop
       const formRoot = document.querySelector('.form-column');
       if (formRoot) {
         setTimeout(() => formRoot.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
@@ -126,6 +135,7 @@ const App = () => {
       newExpenses = expenses.map(e => e.id === savedExpense.id ? savedExpense : e);
       showToast('Expense updated successfully!', 'success');
       setActiveView('history');
+      setDesktopView('history');
       setTimeout(() => {
         const oldExp = expenses.find(e => e.id === savedExpense.id);
         if (oldExp && oldExp.date !== savedExpense.date) {
@@ -198,40 +208,44 @@ const App = () => {
     <>
       <Header showToast={showToast} />
       
-      <main className="main-container">
-        <DashboardStats expenses={expenses} />
-        <DailySummary expenses={expenses} />
-        <MonthlySummary expenses={expenses} />
-        <BudgetSection expenses={expenses} budget={budget} setBudget={setBudget} showToast={showToast} />
+      <div className="app-body">
+        <DesktopNavigation activeView={desktopView} setActiveView={setDesktopView} />
+        
+        <main className="main-container">
+          <DashboardStats expenses={expenses} />
+          <DailySummary expenses={expenses} />
+          <MonthlySummary expenses={expenses} />
+          <BudgetSection expenses={expenses} budget={budget} setBudget={setBudget} showToast={showToast} />
 
-        <div className="content-split-layout">
-          <ExpenseForm 
-            onSave={handleSaveExpense} 
-            expenseToEdit={expenseToEdit} 
-            onCancelEdit={() => { setEditExpenseId(null); setExpenseToEdit(null); }} 
-            showToast={showToast} 
-          />
-          
-          <section className="list-and-charts-column">
-            <AnalyticsCharts expenses={expenses} />
-            <SearchFilters filters={filters} setFilters={setFilters} expenses={expenses} />
-            <ExpenseHistory 
-              displayedExpenses={filteredAndSortedExpenses} 
-              onRowClick={(exp) => setDetailsExpenseId(exp.id)} 
-              editExpenseId={editExpenseId} 
-              isFiltered={isFiltered}
+          <div className="content-split-layout">
+            <ExpenseForm 
+              onSave={handleSaveExpense} 
+              expenseToEdit={expenseToEdit} 
+              onCancelEdit={() => { setEditExpenseId(null); setExpenseToEdit(null); }} 
+              showToast={showToast} 
             />
-          </section>
-        </div>
+            
+            <section className="list-and-charts-column">
+              <AnalyticsCharts expenses={expenses} />
+              <SearchFilters filters={filters} setFilters={setFilters} expenses={expenses} />
+              <ExpenseHistory 
+                displayedExpenses={filteredAndSortedExpenses} 
+                onRowClick={(exp) => setDetailsExpenseId(exp.id)} 
+                editExpenseId={editExpenseId} 
+                isFiltered={isFiltered}
+              />
+            </section>
+          </div>
 
-        <SettingsSection 
-          showToast={showToast} 
-          onImport={handleImport} 
-          onClearAll={handleClearAll} 
-          expenses={expenses} 
-          budget={budget} 
-        />
-      </main>
+          <SettingsSection 
+            showToast={showToast} 
+            onImport={handleImport} 
+            onClearAll={handleClearAll} 
+            expenses={expenses} 
+            budget={budget} 
+          />
+        </main>
+      </div>
 
       <DeleteModal 
         isOpen={!!deleteExpenseId} 

@@ -1553,6 +1553,29 @@ html[data-theme="dark"] #budgetWarningAlert.alert-danger i {
     right: 1rem;
     bottom: 1rem;
   }
+
+  .card {
+    padding: 1rem;
+  }
+
+  .transaction-item {
+    padding: 0.85rem 0.75rem;
+  }
+
+  .transaction-left {
+    gap: 0.65rem;
+  }
+
+  .transaction-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.25rem;
+  }
+
+  .transaction-right {
+    margin-left: 0.5rem;
+    gap: 0.5rem;
+  }
 }
 
 /* Force native form popups to respect dark mode */
@@ -2063,6 +2086,7 @@ html[data-theme="dark"] #budgetWarningAlert.alert-danger i {
 .transaction-info {
   display: flex;
   flex-direction: column;
+  flex: 1;
   min-width: 0;
 }
 
@@ -2087,7 +2111,8 @@ html[data-theme="dark"] #budgetWarningAlert.alert-danger i {
 }
 
 .transaction-meta span {
-  overflow-wrap: anywhere;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .meta-dot {
@@ -2218,4 +2243,156 @@ html[data-theme="dark"] #budgetWarningAlert.alert-danger i {
 
 .details-modal-actions .btn {
   flex: 1;
+}
+
+/* ==========================================================================
+   DESKTOP APP LAYOUT & NAVIGATION
+   ========================================================================== */
+.app-body {
+  display: flex;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.desktop-sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border-color);
+  padding: 2rem 1.25rem;
+  background-color: var(--bg-card);
+  min-height: calc(100vh - 77px); /* App header is approx 77px */
+}
+
+.desktop-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: sticky;
+  top: 90px;
+}
+
+.desktop-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1.1rem;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: left;
+}
+
+.desktop-nav-item i {
+  width: 24px;
+  text-align: center;
+  font-size: 1.15rem;
+}
+
+.desktop-nav-item:hover {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.desktop-nav-item.active {
+  background-color: var(--primary-light);
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.main-container {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (max-width: 1024px) {
+  .desktop-sidebar {
+    width: 220px;
+  }
+}
+
+@media (max-width: 640px) {
+  .app-body {
+    display: block;
+  }
+  .desktop-sidebar {
+    display: none;
+  }
+}
+
+/* DESKTOP VIEW TOGGLING */
+@media (min-width: 641px) {
+  body[data-desktop-view] .dashboard-section,
+  body[data-desktop-view] .daily-summary-section,
+  body[data-desktop-view] .monthly-summary-section,
+  body[data-desktop-view] .budget-section,
+  body[data-desktop-view] .content-split-layout,
+  body[data-desktop-view] .settings-section {
+    display: none !important;
+  }
+
+  body[data-desktop-view="dashboard"] .dashboard-section,
+  body[data-desktop-view="dashboard"] .daily-summary-section,
+  body[data-desktop-view="dashboard"] .monthly-summary-section {
+    display: block !important;
+  }
+
+  body[data-desktop-view="add"] .content-split-layout {
+    display: flex !important;
+    justify-content: center;
+  }
+  body[data-desktop-view="add"] .form-column {
+    display: block !important;
+    width: 100%;
+    max-width: 600px;
+  }
+  body[data-desktop-view="add"] .list-and-charts-column {
+    display: none !important;
+  }
+
+  body[data-desktop-view="history"] .content-split-layout {
+    display: block !important;
+  }
+  body[data-desktop-view="history"] .form-column {
+    display: none !important;
+  }
+  body[data-desktop-view="history"] .list-and-charts-column {
+    display: flex !important;
+  }
+  body[data-desktop-view="history"] .charts-card {
+    display: none !important;
+  }
+  body[data-desktop-view="history"] .toolbar-card,
+  body[data-desktop-view="history"] .expenses-card {
+    display: block !important;
+  }
+
+  body[data-desktop-view="analytics"] .content-split-layout {
+    display: block !important;
+  }
+  body[data-desktop-view="analytics"] .form-column {
+    display: none !important;
+  }
+  body[data-desktop-view="analytics"] .list-and-charts-column {
+    display: flex !important;
+  }
+  body[data-desktop-view="analytics"] .charts-card {
+    display: block !important;
+  }
+  body[data-desktop-view="analytics"] .toolbar-card,
+  body[data-desktop-view="analytics"] .expenses-card {
+    display: none !important;
+  }
+
+  body[data-desktop-view="budget"] .budget-section {
+    display: block !important;
+  }
+
+  body[data-desktop-view="settings"] .settings-section {
+    display: flex !important;
+  }
 }
