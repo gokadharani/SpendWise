@@ -1,40 +1,70 @@
 import React, { useState, useEffect } from 'react';
 import { formatCurrency, getCurrentYearMonthString } from '../utils';
+import { getBudget, createBudget, updateBudget } from '../api/budgets';
 
 const BudgetSection = ({ expenses, budget, setBudget, showToast }) => {
   const [budgetInput, setBudgetInput] = useState('');
-
-  useEffect(() => {
-    if (budget > 0) {
-      setBudgetInput(budget.toString());
-    } else {
-      setBudgetInput('');
-    }
-  }, [budget]);
+  const [budgetData, setBudgetData] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const currentYearMonth = getCurrentYearMonthString();
-  const spentThisMonth = expenses.reduce((sum, exp) => {
-    const isExpense = !exp.type || exp.type === 'Expense';
-    return (isExpense && exp.date && exp.date.startsWith(currentYearMonth))
-      ? sum + (Number(exp.amount) || 0)
-      : sum;
-  }, 0);
 
-  const handleSubmit = (e) => {
+  const fetchBudget = async () => {
+    setLoading(true);
+    try {
+      const res = await getBudget(currentYearMonth);
+      if (res.success && res.budget) {
+        setBudgetData(res.budget);
+        setBudget(res.budget.amount);
+        setBudgetInput(res.budget.amount.toString());
+      }
+    } catch (err) {
+      if (err.status === 404) {
+        // No budget exists yet
+        setBudgetData(null);
+        setBudget(0);
+        setBudgetInput('');
+      } else {
+        console.error('Failed to load budget:', err);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Refresh budget when expenses change or on mount
+  useEffect(() => {
+    fetchBudget();
+  }, [expenses]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const val = parseFloat(budgetInput);
-    if (isNaN(val) || val < 0) {
+    if (isNaN(val) || val <= 0) {
       showToast('Please enter a valid positive budget amount.', 'danger');
       return;
     }
-    setBudget(val);
-    localStorage.setItem('spendwise_budget', val.toString());
-    showToast('Monthly budget set to ' + formatCurrency(val), 'success');
+    
+    setLoading(true);
+    try {
+      if (budgetData) {
+        await updateBudget(currentYearMonth, { amount: val });
+        showToast('Monthly budget updated to ' + formatCurrency(val), 'success');
+      } else {
+        await createBudget({ amount: val, month: currentYearMonth });
+        showToast('Monthly budget set to ' + formatCurrency(val), 'success');
+      }
+      await fetchBudget();
+    } catch (err) {
+      showToast(err.message || 'Failed to set budget', 'danger');
+      setLoading(false);
+    }
   };
 
-  const isConfigured = budget && budget > 0;
-  const remaining = Math.max(0, budget - spentThisMonth);
-  const usedPercentage = isConfigured ? Math.round((spentThisMonth / budget) * 100) : 0;
+  const isConfigured = !!budgetData;
+  const spentThisMonth = budgetData ? budgetData.spent : 0;
+  const remaining = budgetData ? budgetData.remaining : 0;
+  const usedPercentage = budgetData ? budgetData.percentage : 0;
   const visualFill = Math.min(Math.max(usedPercentage, 0), 100);
 
   let fillClass = 'budget-progress-bar-fill';
@@ -83,14 +113,15 @@ const BudgetSection = ({ expenses, budget, setBudget, showToast }) => {
                 type="number" 
                 id="monthlyBudgetInput" 
                 placeholder="Set monthly budget" 
-                min="0" 
+                min="1" 
                 step="any" 
                 required 
                 value={budgetInput}
                 onChange={(e) => setBudgetInput(e.target.value)}
+                disabled={loading}
               />
-              <button type="submit" className="btn btn-primary btn-sm">
-                <i className="fa-solid fa-check"></i> Set Budget
+              <button type="submit" className="btn btn-primary btn-sm" disabled={loading}>
+                <i className="fa-solid fa-check"></i> {loading ? 'Saving...' : 'Set Budget'}
               </button>
             </div>
           </form>

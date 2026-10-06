@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import StatCard from './StatCard';
+import { getAnalyticsSummary } from '../api/analytics';
 
 const DashboardStats = ({ expenses = [] }) => {
   const [activeDetail, setActiveDetail] = useState(null);
@@ -12,24 +13,34 @@ const DashboardStats = ({ expenses = [] }) => {
     }).format(amount);
   };
 
-  const stats = useMemo(() => {
-    let totalIncome = 0;
-    let totalExpenses = 0;
-    let totalSavings = 0;
-    let totalInvestments = 0;
+  const [summaryStats, setSummaryStats] = useState({
+    totalIncome: 0,
+    totalExpenses: 0,
+    totalSavings: 0,
+    totalInvestments: 0,
+    balance: 0,
+  });
 
-    expenses.forEach(exp => {
-      const amt = Number(exp.amount) || 0;
-      const type = exp.type || 'Expense'; // default for older records
-      if (type === 'Income') totalIncome += amt;
-      else if (type === 'Expense') totalExpenses += amt;
-      else if (type === 'Savings') totalSavings += amt;
-      else if (type === 'Investment') totalInvestments += amt;
-    });
-
-    const balance = totalIncome - totalExpenses - totalSavings - totalInvestments;
-
-    return { totalIncome, totalExpenses, totalSavings, totalInvestments, balance, count: expenses.length };
+  useEffect(() => {
+    let isMounted = true;
+    const fetchSummary = async () => {
+      try {
+        const res = await getAnalyticsSummary();
+        if (isMounted && res.success && res.summary) {
+          setSummaryStats({
+            totalIncome: res.summary.totalIncome || 0,
+            totalExpenses: res.summary.totalExpenses || 0,
+            totalSavings: res.summary.totalSavings || 0,
+            totalInvestments: res.summary.totalInvestments || 0,
+            balance: res.summary.availableBalance || 0,
+          });
+        }
+      } catch (err) {
+        console.error("Failed to load dashboard summary stats", err);
+      }
+    };
+    fetchSummary();
+    return () => { isMounted = false; };
   }, [expenses]);
 
   const renderDetailView = () => {
@@ -39,7 +50,7 @@ const DashboardStats = ({ expenses = [] }) => {
 
     if (activeDetail === 'balance') {
       detailTitle = 'Available Balance';
-      detailValue = formatCurrency(stats.balance);
+      detailValue = formatCurrency(summaryStats.balance);
       detailContent = (
         <div>
           <p>This is your total income minus all expenses, savings, and investments.</p>
@@ -47,7 +58,7 @@ const DashboardStats = ({ expenses = [] }) => {
       );
     } else if (activeDetail === 'income') {
       detailTitle = 'Total Income';
-      detailValue = formatCurrency(stats.totalIncome);
+      detailValue = formatCurrency(summaryStats.totalIncome);
       detailContent = (
         <div>
           <p>Total money earned or received across all time.</p>
@@ -55,7 +66,7 @@ const DashboardStats = ({ expenses = [] }) => {
       );
     } else if (activeDetail === 'expense') {
       detailTitle = 'Total Expenses';
-      detailValue = formatCurrency(stats.totalExpenses);
+      detailValue = formatCurrency(summaryStats.totalExpenses);
       detailContent = (
         <div>
           <p>Money spent on daily needs, bills, and other expenses.</p>
@@ -63,11 +74,11 @@ const DashboardStats = ({ expenses = [] }) => {
       );
     } else if (activeDetail === 'savings') {
       detailTitle = 'Total Savings & Investments';
-      detailValue = formatCurrency(stats.totalSavings + stats.totalInvestments);
+      detailValue = formatCurrency(summaryStats.totalSavings + summaryStats.totalInvestments);
       detailContent = (
         <div>
-          <p>Savings: <strong>{formatCurrency(stats.totalSavings)}</strong></p>
-          <p>Investments: <strong>{formatCurrency(stats.totalInvestments)}</strong></p>
+          <p>Savings: <strong>{formatCurrency(summaryStats.totalSavings)}</strong></p>
+          <p>Investments: <strong>{formatCurrency(summaryStats.totalInvestments)}</strong></p>
         </div>
       );
     }
@@ -112,7 +123,7 @@ const DashboardStats = ({ expenses = [] }) => {
             cardClass="stat-total"
             iconClass="fa-solid fa-wallet"
             label="Balance"
-            value={formatCurrency(stats.balance)}
+            value={formatCurrency(summaryStats.balance)}
             metaText="Available funds"
             onClick={() => setActiveDetail('balance')}
           />
@@ -121,7 +132,7 @@ const DashboardStats = ({ expenses = [] }) => {
             cardClass="stat-income"
             iconClass="fa-solid fa-arrow-down"
             label="Income"
-            value={formatCurrency(stats.totalIncome)}
+            value={formatCurrency(summaryStats.totalIncome)}
             metaText="Lifetime earned"
             onClick={() => setActiveDetail('income')}
           />
@@ -130,7 +141,7 @@ const DashboardStats = ({ expenses = [] }) => {
             cardClass="stat-expense"
             iconClass="fa-solid fa-arrow-up"
             label="Expenses"
-            value={formatCurrency(stats.totalExpenses)}
+            value={formatCurrency(summaryStats.totalExpenses)}
             metaText="Lifetime spent"
             onClick={() => setActiveDetail('expense')}
           />
@@ -139,7 +150,7 @@ const DashboardStats = ({ expenses = [] }) => {
             cardClass="stat-savings"
             iconClass="fa-solid fa-piggy-bank"
             label="Saved/Invested"
-            value={formatCurrency(stats.totalSavings + stats.totalInvestments)}
+            value={formatCurrency(summaryStats.totalSavings + summaryStats.totalInvestments)}
             metaText="Lifetime secured"
             onClick={() => setActiveDetail('savings')}
           />

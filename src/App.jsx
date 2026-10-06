@@ -13,9 +13,15 @@ import DesktopNavigation from './components/DesktopNavigation';
 import { DeleteModal, DetailsModal } from './components/Modals';
 import ToastContainer from './components/ToastContainer';
 import { formatMonthYear } from './utils';
+import AuthScreen from './components/AuthScreen';
+import { useAuth } from './context/AuthContext';
+import { getTransactions, createTransaction, updateTransaction, deleteTransaction } from './api/transactions';
 
 const App = () => {
+  const { currentUser, loading: authLoading } = useAuth();
+  
   const [expenses, setExpenses] = useState([]);
+  const [loadingTransactions, setLoadingTransactions] = useState(false);
   const [budget, setBudget] = useState(0);
   
   // Filtering state
@@ -45,21 +51,25 @@ const App = () => {
   const [toasts, setToasts] = useState([]);
 
   useEffect(() => {
-    // Initial Load
-    try {
-      const savedExpenses = localStorage.getItem('spendwise_expenses') || localStorage.getItem('expenses');
-      if (savedExpenses) {
-        const parsed = JSON.parse(savedExpenses);
-        if (Array.isArray(parsed)) setExpenses(parsed);
-      }
-      const savedBudget = localStorage.getItem('spendwise_budget');
-      if (savedBudget) {
-        setBudget(parseFloat(savedBudget));
-      }
-    } catch (e) {
-      console.error('Error loading data', e);
+    // Legacy localStorage data fallback check removed.
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (currentUser) {
+      setLoadingTransactions(true);
+      getTransactions()
+        .then(data => {
+          if (data && data.transactions) {
+            setExpenses(data.transactions);
+          }
+        })
+        .catch(err => {
+          console.error("Failed to load transactions", err);
+          showToast("Failed to load transactions", "error");
+        })
+        .finally(() => setLoadingTransactions(false));
     }
-  }, []);
+  }, [currentUser]);
 
   useEffect(() => {
     document.body.setAttribute('data-mobile-view', activeView);
@@ -81,30 +91,30 @@ const App = () => {
   };
 
   const handleImport = (newExpenses, newBudget) => {
-    setExpenses(newExpenses);
-    setBudget(newBudget);
-    localStorage.setItem('spendwise_expenses', JSON.stringify(newExpenses));
-    localStorage.setItem('spendwise_budget', newBudget.toString());
+    // Import functionality is disabled because data is now managed by the backend
+    showToast('Import functionality is disabled in the cloud version.', 'warning');
   };
 
   const handleClearAll = () => {
-    setExpenses([]);
-    setBudget(0);
-    localStorage.removeItem('spendwise_expenses');
-    localStorage.removeItem('spendwise_budget');
-    localStorage.removeItem('expenses');
+    // Clear all functionality is disabled to prevent accidental cloud data loss
+    showToast('Clear all data functionality is disabled in the cloud version.', 'warning');
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (!deleteExpenseId) return;
-    const newExpenses = expenses.filter(e => e.id !== deleteExpenseId);
-    setExpenses(newExpenses);
-    localStorage.setItem('spendwise_expenses', JSON.stringify(newExpenses));
-    setDeleteExpenseId(null);
-    showToast('Expense deleted successfully', 'success');
-    if (editExpenseId === deleteExpenseId) {
-      setEditExpenseId(null);
-      setExpenseToEdit(null);
+    try {
+      await deleteTransaction(deleteExpenseId);
+      const newExpenses = expenses.filter(e => e.id !== deleteExpenseId);
+      setExpenses(newExpenses);
+      setDeleteExpenseId(null);
+      showToast('Transaction deleted successfully', 'success');
+      if (editExpenseId === deleteExpenseId) {
+        setEditExpenseId(null);
+        setExpenseToEdit(null);
+      }
+    } catch (error) {
+      showToast(error.message || 'Failed to delete transaction', 'error');
+      setDeleteExpenseId(null);
     }
   };
 
@@ -129,32 +139,51 @@ const App = () => {
     setDeleteExpenseId(id);
   };
 
-  const handleSaveExpense = (savedExpense, isEdit) => {
-    let newExpenses;
-    if (isEdit) {
-      newExpenses = expenses.map(e => e.id === savedExpense.id ? savedExpense : e);
-      showToast('Expense updated successfully!', 'success');
-      setActiveView('history');
-      setDesktopView('history');
-      setTimeout(() => {
-        const oldExp = expenses.find(e => e.id === savedExpense.id);
-        if (oldExp && oldExp.date !== savedExpense.date) {
-          const editedElement = document.getElementById(`expense-${savedExpense.id}`);
-          if (editedElement) {
-            editedElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const handleSaveExpense = async (savedExpense, isEdit) => {
+    try {
+      // Backend expects 'date' formatted as a string/Date but frontend provides it. Ensure correct fields
+      const payload = {
+        amount: Number(savedExpense.amount),
+        type: savedExpense.type,
+        category: savedExpense.category,
+        description: savedExpense.description,
+        date: savedExpense.date
+      };
+
+      let returnedTransaction;
+      
+      if (isEdit) {
+        const res = await updateTransaction(savedExpense.id, payload);
+        returnedTransaction = res.transaction;
+        const newExpenses = expenses.map(e => e.id === savedExpense.id ? returnedTransaction : e);
+        setExpenses(newExpenses);
+        
+        showToast('Transaction updated successfully!', 'success');
+        setActiveView('history');
+        setDesktopView('history');
+        setTimeout(() => {
+          const oldExp = expenses.find(e => e.id === savedExpense.id);
+          if (oldExp && oldExp.date !== savedExpense.date) {
+            const editedElement = document.getElementById(`expense-${savedExpense.id}`);
+            if (editedElement) {
+              editedElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          } else {
+            window.scrollTo({ top: historyScrollPos, behavior: 'instant' });
           }
-        } else {
-          window.scrollTo({ top: historyScrollPos, behavior: 'instant' });
-        }
-      }, 50);
-    } else {
-      newExpenses = [savedExpense, ...expenses];
-      showToast(`Added ₹${savedExpense.amount.toFixed(2)} for ${savedExpense.category}`, 'success');
+        }, 50);
+      } else {
+        const res = await createTransaction(payload);
+        returnedTransaction = res.transaction;
+        setExpenses([returnedTransaction, ...expenses]);
+        showToast(`Added ₹${returnedTransaction.amount.toFixed(2)} for ${returnedTransaction.category}`, 'success');
+      }
+      
+      setEditExpenseId(null);
+      setExpenseToEdit(null);
+    } catch (error) {
+      showToast(error.message || 'Failed to save transaction', 'error');
     }
-    setExpenses(newExpenses);
-    localStorage.setItem('spendwise_expenses', JSON.stringify(newExpenses));
-    setEditExpenseId(null);
-    setExpenseToEdit(null);
   };
 
   const filteredAndSortedExpenses = useMemo(() => {
@@ -228,6 +257,14 @@ const App = () => {
 
   const isFiltered = filters.search !== '' || filters.category !== 'ALL' || filters.payment !== 'ALL' || filters.month !== 'ALL' || filters.date !== '';
 
+  if (authLoading) {
+    return <div className="auth-screen"><div className="auth-container"><h2>Loading SpendWise...</h2></div></div>;
+  }
+
+  if (!currentUser) {
+    return <AuthScreen />;
+  }
+
   return (
     <>
       <Header showToast={showToast} />
@@ -241,25 +278,31 @@ const App = () => {
           <MonthlySummary expenses={expenses} />
           <BudgetSection expenses={expenses} budget={budget} setBudget={setBudget} showToast={showToast} />
 
-          <div className="content-split-layout">
-            <ExpenseForm 
-              onSave={handleSaveExpense} 
-              expenseToEdit={expenseToEdit} 
-              onCancelEdit={() => { setEditExpenseId(null); setExpenseToEdit(null); }} 
-              showToast={showToast} 
-            />
-            
-            <section className="list-and-charts-column">
-              <AnalyticsCharts expenses={expenses} />
-              <SearchFilters filters={filters} setFilters={setFilters} expenses={expenses} />
-              <ExpenseHistory 
-                displayedExpenses={filteredAndSortedExpenses} 
-                onRowClick={(exp) => setDetailsExpenseId(exp.id)} 
-                editExpenseId={editExpenseId} 
-                isFiltered={isFiltered}
+          {loadingTransactions ? (
+            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+              Loading your transactions...
+            </div>
+          ) : (
+            <div className="content-split-layout">
+              <ExpenseForm 
+                onSave={handleSaveExpense} 
+                expenseToEdit={expenseToEdit} 
+                onCancelEdit={() => { setEditExpenseId(null); setExpenseToEdit(null); }} 
+                showToast={showToast} 
               />
-            </section>
-          </div>
+              
+              <section className="list-and-charts-column">
+                <AnalyticsCharts expenses={expenses} />
+                <SearchFilters filters={filters} setFilters={setFilters} expenses={expenses} />
+                <ExpenseHistory 
+                  displayedExpenses={filteredAndSortedExpenses} 
+                  onRowClick={(exp) => setDetailsExpenseId(exp.id)} 
+                  editExpenseId={editExpenseId} 
+                  isFiltered={isFiltered}
+                />
+              </section>
+            </div>
+          )}
 
           <SettingsSection 
             showToast={showToast} 
