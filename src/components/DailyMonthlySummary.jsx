@@ -5,8 +5,8 @@ export const DailySummary = ({ expenses }) => {
   const todayStr = getTodayDateString();
   const yesterdayStr = getYesterdayDateString();
 
-  const todayTotal = expenses.reduce((sum, exp) => exp.date === todayStr ? sum + (Number(exp.amount) || 0) : sum, 0);
-  const yesterdayTotal = expenses.reduce((sum, exp) => exp.date === yesterdayStr ? sum + (Number(exp.amount) || 0) : sum, 0);
+  const todayTotal = expenses.reduce((sum, exp) => (!exp.type || exp.type === 'Expense') && exp.date === todayStr ? sum + (Number(exp.amount) || 0) : sum, 0);
+  const yesterdayTotal = expenses.reduce((sum, exp) => (!exp.type || exp.type === 'Expense') && exp.date === yesterdayStr ? sum + (Number(exp.amount) || 0) : sum, 0);
 
   return (
     <section className="daily-summary-section" aria-label="Daily Spending Summary">
@@ -46,8 +46,8 @@ export const MonthlySummary = ({ expenses }) => {
   const currentYearMonth = getCurrentYearMonthString();
   const prevYearMonth = getPreviousYearMonthString();
 
-  const thisMonthTotal = expenses.reduce((sum, exp) => (exp.date && exp.date.startsWith(currentYearMonth)) ? sum + (Number(exp.amount) || 0) : sum, 0);
-  const lastMonthTotal = expenses.reduce((sum, exp) => (exp.date && exp.date.startsWith(prevYearMonth)) ? sum + (Number(exp.amount) || 0) : sum, 0);
+  const thisMonthTotal = expenses.reduce((sum, exp) => ((!exp.type || exp.type === 'Expense') && exp.date && exp.date.startsWith(currentYearMonth)) ? sum + (Number(exp.amount) || 0) : sum, 0);
+  const lastMonthTotal = expenses.reduce((sum, exp) => ((!exp.type || exp.type === 'Expense') && exp.date && exp.date.startsWith(prevYearMonth)) ? sum + (Number(exp.amount) || 0) : sum, 0);
 
   return (
     <section className="monthly-summary-section" aria-label="Monthly Spending Summary">

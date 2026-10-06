@@ -6,10 +6,23 @@ const StatCard = ({
   value,
   metaText,
   metaId,
-  cardClass
+  cardClass,
+  onClick
 }) => {
   return (
-    <div className={`stat-card ${cardClass}`}>
+    <div 
+      className={`stat-card ${cardClass}`}
+      onClick={onClick}
+      style={{ cursor: onClick ? 'pointer' : 'default' }}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={(e) => {
+        if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+    >
       <div className="stat-icon-wrapper">
         <i className={iconClass}></i>
       </div>

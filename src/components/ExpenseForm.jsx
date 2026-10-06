@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getTodayDateString } from '../utils';
 
 const ExpenseForm = ({ onSave, expenseToEdit, onCancelEdit, showToast }) => {
+  const [type, setType] = useState('Expense');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
   const [date, setDate] = useState('');
@@ -11,8 +12,9 @@ const ExpenseForm = ({ onSave, expenseToEdit, onCancelEdit, showToast }) => {
 
   useEffect(() => {
     if (expenseToEdit) {
+      setType(expenseToEdit.type || 'Expense');
       setAmount(expenseToEdit.amount.toString());
-      setCategory(expenseToEdit.category);
+      setCategory(expenseToEdit.category || (expenseToEdit.type === 'Income' ? 'Salary' : ''));
       setDate(expenseToEdit.date);
       setPayment(expenseToEdit.paymentMethod || expenseToEdit.payment);
       setDescription(expenseToEdit.description || '');
@@ -31,9 +33,10 @@ const ExpenseForm = ({ onSave, expenseToEdit, onCancelEdit, showToast }) => {
   const validate = () => {
     const newErrors = {};
     let isValid = true;
-    if (!amount) { newErrors.amount = 'Please enter an expense amount.'; isValid = false; }
+    if (!type) { newErrors.type = 'Please select a type.'; isValid = false; }
+    if (!amount) { newErrors.amount = 'Please enter an amount.'; isValid = false; }
     else if (isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) { newErrors.amount = 'Amount must be a positive number greater than 0.'; isValid = false; }
-    if (!category) { newErrors.category = 'Please select an expense category.'; isValid = false; }
+    if (!category) { newErrors.category = 'Please select a category.'; isValid = false; }
     if (!date) { newErrors.date = 'Please select a date.'; isValid = false; }
     if (!payment) { newErrors.payment = 'Please choose a payment method.'; isValid = false; }
     setErrors(newErrors);
@@ -41,6 +44,7 @@ const ExpenseForm = ({ onSave, expenseToEdit, onCancelEdit, showToast }) => {
   };
 
   const resetForm = () => {
+    setType('Expense');
     setAmount('');
     setCategory('');
     setPayment('');
@@ -60,6 +64,7 @@ const ExpenseForm = ({ onSave, expenseToEdit, onCancelEdit, showToast }) => {
     
     const savedExpense = {
       id: expenseToEdit ? expenseToEdit.id : 'exp-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+      type,
       amount: expenseAmount,
       category,
       date,
@@ -76,12 +81,26 @@ const ExpenseForm = ({ onSave, expenseToEdit, onCancelEdit, showToast }) => {
       <div className="card form-card">
         <div className="form-card-header">
           <h2 className="card-title">
-            {expenseToEdit ? <><i className="fa-solid fa-pen-to-square"></i> Edit Expense</> : <><i className="fa-solid fa-circle-plus"></i> Add New Expense</>}
+            {expenseToEdit ? <><i className="fa-solid fa-pen-to-square"></i> Edit Transaction</> : <><i className="fa-solid fa-circle-plus"></i> Add New Transaction</>}
           </h2>
           <p className="card-subtitle">Keep your records detailed and up-to-date</p>
         </div>
 
         <form className="expense-form" noValidate onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label>Type <span className="required">*</span></label>
+            <div className="input-with-icon">
+              <i className="fa-solid fa-exchange-alt input-icon"></i>
+              <select required value={type} onChange={(e) => { setType(e.target.value); setErrors({...errors, type: ''}); }}
+                style={{ borderColor: errors.type ? 'var(--danger)' : '' }}>
+                <option value="Income">Income</option>
+                <option value="Expense">Expense</option>
+                <option value="Savings">Savings</option>
+                <option value="Investment">Investment</option>
+              </select>
+            </div>
+            <small className="form-error">{errors.type}</small>
+          </div>
           <div className="form-group">
             <label>Amount (₹) <span className="required">*</span></label>
             <div className="input-with-icon">
@@ -99,14 +118,33 @@ const ExpenseForm = ({ onSave, expenseToEdit, onCancelEdit, showToast }) => {
               <select required value={category} onChange={(e) => { setCategory(e.target.value); setErrors({...errors, category: ''}); }}
                 style={{ borderColor: errors.category ? 'var(--danger)' : '' }}>
                 <option value="" disabled>Select Category</option>
-                <option value="Food">🍔 Food</option>
-                <option value="Travel">✈️ Travel</option>
-                <option value="Shopping">🛍️ Shopping</option>
-                <option value="Bills">💡 Bills</option>
-                <option value="Entertainment">🎬 Entertainment</option>
-                <option value="Health">💊 Health</option>
-                <option value="Education">📚 Education</option>
-                <option value="Other">✨ Other</option>
+                {type === 'Income' ? (
+                  <>
+                    <option value="Salary">💰 Salary</option>
+                    <option value="Business">🏢 Business</option>
+                    <option value="Gift">🎁 Gift</option>
+                    <option value="Other Income">💵 Other Income</option>
+                  </>
+                ) : type === 'Savings' || type === 'Investment' ? (
+                  <>
+                    <option value="Bank">🏦 Bank</option>
+                    <option value="Stocks">📈 Stocks</option>
+                    <option value="Mutual Funds">📊 Mutual Funds</option>
+                    <option value="Crypto">🪙 Crypto</option>
+                    <option value="Other">✨ Other</option>
+                  </>
+                ) : (
+                  <>
+                    <option value="Food">🍔 Food</option>
+                    <option value="Travel">✈️ Travel</option>
+                    <option value="Shopping">🛍️ Shopping</option>
+                    <option value="Bills">💡 Bills</option>
+                    <option value="Entertainment">🎬 Entertainment</option>
+                    <option value="Health">💊 Health</option>
+                    <option value="Education">📚 Education</option>
+                    <option value="Other">✨ Other</option>
+                  </>
+                )}
               </select>
             </div>
             <small className="form-error">{errors.category}</small>

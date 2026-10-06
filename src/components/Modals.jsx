@@ -9,9 +9,9 @@ export const DeleteModal = ({ isOpen, onCancel, onConfirm }) => {
         <div className="modal-icon-danger">
           <i className="fa-solid fa-trash-can"></i>
         </div>
-        <h3 id="modalTitle" className="modal-title">Delete Expense</h3>
+        <h3 id="modalTitle" className="modal-title">Delete Transaction</h3>
         <p className="modal-desc">
-          Are you sure you want to delete this expense record? This action cannot be undone.
+          Are you sure you want to delete this transaction? This action cannot be undone.
         </p>
         <div className="modal-actions">
           <button type="button" className="btn btn-secondary" onClick={onCancel}>Cancel</button>
@@ -37,7 +37,16 @@ export const DetailsModal = ({ isOpen, expense, onClose, onEdit, onDelete }) => 
 
         <div className="details-modal-content">
           <div className="details-view-content">
-            <div className="details-amount-large">{formatCurrency(expense.amount)}</div>
+            <div className="details-amount-large" style={{ color: expense.type === 'Income' ? 'var(--success)' : expense.type === 'Savings' ? 'var(--info)' : expense.type === 'Investment' ? 'var(--warning)' : 'inherit' }}>
+              {expense.type === 'Income' ? '+' : expense.type === 'Expense' ? '-' : expense.type === 'Savings' ? '-' : expense.type === 'Investment' ? '-' : ''}{formatCurrency(expense.amount)}
+            </div>
+
+            <div className="details-row">
+              <div className="details-label">Type</div>
+              <div className="details-value">
+                <span className="badge badge-accent">{expense.type || 'Expense'}</span>
+              </div>
+            </div>
 
             {expense.description && (
               <div className="details-row">

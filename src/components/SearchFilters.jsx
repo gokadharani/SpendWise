@@ -37,14 +37,28 @@ const SearchFilters = ({ filters, setFilters, expenses }) => {
           <label>Category</label>
           <select value={filters.category} onChange={e => setFilters({ ...filters, category: e.target.value })}>
             <option value="ALL">All Categories</option>
-            <option value="Food">Food</option>
-            <option value="Travel">Travel</option>
-            <option value="Shopping">Shopping</option>
-            <option value="Bills">Bills</option>
-            <option value="Entertainment">Entertainment</option>
-            <option value="Health">Health</option>
-            <option value="Education">Education</option>
-            <option value="Other">Other</option>
+            <optgroup label="Income">
+              <option value="Salary">Salary</option>
+              <option value="Business">Business</option>
+              <option value="Gift">Gift</option>
+              <option value="Other Income">Other Income</option>
+            </optgroup>
+            <optgroup label="Expenses">
+              <option value="Food">Food</option>
+              <option value="Travel">Travel</option>
+              <option value="Shopping">Shopping</option>
+              <option value="Bills">Bills</option>
+              <option value="Entertainment">Entertainment</option>
+              <option value="Health">Health</option>
+              <option value="Education">Education</option>
+              <option value="Other">Other</option>
+            </optgroup>
+            <optgroup label="Savings & Investments">
+              <option value="Bank">Bank</option>
+              <option value="Stocks">Stocks</option>
+              <option value="Mutual Funds">Mutual Funds</option>
+              <option value="Crypto">Crypto</option>
+            </optgroup>
           </select>
         </div>
         <div className="filter-group">

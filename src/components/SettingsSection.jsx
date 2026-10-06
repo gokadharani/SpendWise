@@ -1,7 +1,9 @@
 import React, { useRef } from 'react';
+import { useAuth } from '../context/AuthContext';
 
 const SettingsSection = ({ showToast, onImport, onClearAll, expenses, budget }) => {
   const fileInputRef = useRef(null);
+  const { currentUser, logout } = useAuth();
 
   const handleExport = () => {
     try {
@@ -98,6 +100,20 @@ const SettingsSection = ({ showToast, onImport, onClearAll, expenses, budget }) 
             <button className="btn btn-danger btn-block" onClick={handleClearAll}><i className="fa-solid fa-trash-can"></i> Clear All Data</button>
           </div>
           <input type="file" accept=".json,application/json" className="hidden" ref={fileInputRef} onChange={handleFileChange} />
+        </div>
+
+        <div className="card settings-card">
+          <h3 className="card-title">Account Profile</h3>
+          <p className="card-subtitle">Manage your account sessions</p>
+          {currentUser && (
+            <div className="settings-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '0.5rem' }}>
+              <span className="settings-label">Logged in as {currentUser.name}</span>
+              <span className="settings-value">{currentUser.email}</span>
+            </div>
+          )}
+          <div className="settings-actions" style={{ marginTop: '1rem' }}>
+            <button className="btn btn-outline btn-block" onClick={logout}><i className="fa-solid fa-right-from-bracket"></i> Logout</button>
+          </div>
         </div>
       </div>
     </section>
