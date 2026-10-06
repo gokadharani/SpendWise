@@ -158,7 +158,31 @@ const App = () => {
   };
 
   const filteredAndSortedExpenses = useMemo(() => {
-    let filtered = expenses.filter(expense => {
+    // 1. Calculate running balances chronologically using the complete dataset
+    const chronological = [...expenses].sort((a, b) => {
+      const dateCmp = (a.date || '').localeCompare(b.date || '');
+      if (dateCmp !== 0) return dateCmp;
+      return expenses.indexOf(b) - expenses.indexOf(a); // older items first
+    });
+
+    const balanceMap = new Map();
+    let currentBalance = 0;
+    chronological.forEach(exp => {
+      const amt = Number(exp.amount) || 0;
+      const type = exp.type || 'Expense';
+      if (type === 'Income') {
+        currentBalance += amt;
+      } else {
+        currentBalance -= amt;
+      }
+      balanceMap.set(exp.id, currentBalance);
+    });
+
+    // 2. Apply filters
+    let filtered = expenses.map(exp => ({
+      ...exp,
+      runningBalance: balanceMap.get(exp.id)
+    })).filter(expense => {
       if (filters.search && !(expense.description || '').toLowerCase().includes(filters.search.toLowerCase())) return false;
       if (filters.category !== 'ALL' && expense.category !== filters.category) return false;
       if (filters.payment !== 'ALL' && expense.paymentMethod !== filters.payment && expense.payment !== filters.payment) return false;

@@ -29,6 +29,14 @@ export const getCategoryEmoji = (category) => {
     Entertainment: '🎬',
     Health: '💊',
     Education: '📚',
+    Salary: '💰',
+    Business: '🏢',
+    Gift: '🎁',
+    'Other Income': '💵',
+    Bank: '🏦',
+    Stocks: '📈',
+    'Mutual Funds': '📊',
+    Crypto: '🪙',
     Other: '✨'
   };
   return emojis[category] || '🏷️';

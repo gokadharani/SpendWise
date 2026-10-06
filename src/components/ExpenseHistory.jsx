@@ -3,7 +3,13 @@ import { formatCurrency, formatDate, getCategoryEmoji, getPaymentIconClass } fro
 
 const ExpenseHistory = ({ displayedExpenses, onRowClick, editExpenseId, isFiltered }) => {
   const displayedTotal = useMemo(() => {
-    return displayedExpenses.reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
+    return displayedExpenses.reduce((sum, exp) => {
+      const type = exp.type || 'Expense';
+      if (type === 'Expense') {
+        return sum + (Number(exp.amount) || 0);
+      }
+      return sum;
+    }, 0);
   }, [displayedExpenses]);
 
   const grouped = useMemo(() => {
@@ -72,7 +78,16 @@ const ExpenseHistory = ({ displayedExpenses, onRowClick, editExpenseId, isFilter
               <div key={group.dateStr} className="transaction-date-group">
                 <h4 className="transaction-date-header">{getHumanDate(group.dateStr)}</h4>
                 <div className="transaction-items">
-                  {group.items.map(expense => (
+                  {group.items.map(expense => {
+                    const type = expense.type || 'Expense';
+                    let amountColor = 'inherit';
+                    let sign = '';
+                    if (type === 'Income') { amountColor = 'var(--success)'; sign = '+'; }
+                    else if (type === 'Expense') { amountColor = 'var(--text-primary)'; sign = '-'; }
+                    else if (type === 'Savings') { amountColor = 'var(--info)'; sign = '-'; }
+                    else if (type === 'Investment') { amountColor = 'var(--warning)'; sign = '-'; }
+
+                    return (
                     <div 
                       key={expense.id} 
                       id={`expense-${expense.id}`}
@@ -88,6 +103,7 @@ const ExpenseHistory = ({ displayedExpenses, onRowClick, editExpenseId, isFilter
                             {expense.description ? expense.description : <span className="text-muted">—</span>}
                           </div>
                           <div className="transaction-meta">
+                            <span className="badge badge-accent" style={{fontSize: '0.65rem', marginRight: '4px', padding: '2px 4px'}}>{type}</span>
                             <span>{expense.category}</span>
                             <span className="meta-dot">•</span>
                             <span><i className={getPaymentIconClass(expense.paymentMethod || expense.payment)}></i> {expense.paymentMethod || expense.payment}</span>
@@ -95,11 +111,20 @@ const ExpenseHistory = ({ displayedExpenses, onRowClick, editExpenseId, isFilter
                         </div>
                       </div>
                       <div className="transaction-right">
-                        <div className="transaction-amount">{formatCurrency(expense.amount)}</div>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                          <div className="transaction-amount" style={{ color: amountColor, fontWeight: type === 'Income' ? '600' : '500' }}>
+                            {sign}{formatCurrency(expense.amount)}
+                          </div>
+                          {expense.runningBalance !== undefined && (
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                              Bal: {formatCurrency(expense.runningBalance)}
+                            </div>
+                          )}
+                        </div>
                         <i className="fa-solid fa-chevron-right transaction-chevron"></i>
                       </div>
                     </div>
-                  ))}
+                  )})}
                 </div>
               </div>
             ))}

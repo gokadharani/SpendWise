@@ -12,9 +12,15 @@ const AnalyticsCharts = ({ expenses }) => {
   const paymentChartInstance = useRef(null);
 
   useEffect(() => {
+    // Make Chart.js inherit the app's dynamic text color hierarchy
+    const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim() || '#666';
+    Chart.defaults.color = textColor;
+
+    const expenseOnly = expenses.filter(exp => !exp.type || exp.type === 'Expense');
+
     // 1. Category Chart
     if (categoryChartInstance.current) categoryChartInstance.current.destroy();
-    if (!expenses.length) {
+    if (!expenseOnly.length) {
       categoryChartInstance.current = new Chart(categoryChartRef.current, {
         type: 'doughnut',
         data: { labels: ['No Data'], datasets: [{ data: [1], backgroundColor: ['#e5e7eb'], borderWidth: 0 }] },
@@ -22,7 +28,7 @@ const AnalyticsCharts = ({ expenses }) => {
       });
     } else {
       const categoryTotals = {};
-      expenses.forEach(exp => {
+      expenseOnly.forEach(exp => {
         const cat = exp.category || 'Uncategorized';
         const amt = Number(exp.amount) || 0;
         if (amt > 0) categoryTotals[cat] = (categoryTotals[cat] || 0) + amt;
@@ -49,14 +55,14 @@ const AnalyticsCharts = ({ expenses }) => {
 
     // 2. Trend Chart
     if (trendChartInstance.current) trendChartInstance.current.destroy();
-    if (!expenses.length) {
+    if (!expenseOnly.length) {
       trendChartInstance.current = new Chart(trendChartRef.current, {
         type: 'line', data: { labels: ['No Data'], datasets: [{ data: [0], borderColor: '#e5e7eb', borderWidth: 2, pointBackgroundColor: '#e5e7eb' }] },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } } }
       });
     } else {
       const monthlyTotals = {};
-      expenses.forEach(exp => {
+      expenseOnly.forEach(exp => {
         const amt = Number(exp.amount) || 0;
         if (amt > 0 && exp.date) {
           const monthStr = exp.date.substring(0, 7);
@@ -83,14 +89,14 @@ const AnalyticsCharts = ({ expenses }) => {
 
     // 3. Payment Chart
     if (paymentChartInstance.current) paymentChartInstance.current.destroy();
-    if (!expenses.length) {
+    if (!expenseOnly.length) {
       paymentChartInstance.current = new Chart(paymentChartRef.current, {
         type: 'pie', data: { labels: ['No Data'], datasets: [{ data: [1], backgroundColor: ['#e5e7eb'], borderWidth: 0 }] },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, cutout: '0%' }
       });
     } else {
       const paymentTotals = {};
-      expenses.forEach(exp => {
+      expenseOnly.forEach(exp => {
         const method = exp.paymentMethod || exp.payment || 'Uncategorized';
         const amt = Number(exp.amount) || 0;
         if (amt > 0) paymentTotals[method] = (paymentTotals[method] || 0) + amt;

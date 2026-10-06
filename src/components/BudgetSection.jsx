@@ -14,7 +14,8 @@ const BudgetSection = ({ expenses, budget, setBudget, showToast }) => {
 
   const currentYearMonth = getCurrentYearMonthString();
   const spentThisMonth = expenses.reduce((sum, exp) => {
-    return (exp.date && exp.date.startsWith(currentYearMonth))
+    const isExpense = !exp.type || exp.type === 'Expense';
+    return (isExpense && exp.date && exp.date.startsWith(currentYearMonth))
       ? sum + (Number(exp.amount) || 0)
       : sum;
   }, 0);

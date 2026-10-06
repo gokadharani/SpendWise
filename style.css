@@ -15,9 +15,10 @@
   --border-focus: #6366f1;
 
   /* Text Colors */
-  --text-primary: #0f172a;
+  --text-heading: #0f172a;
+  --text-primary: #1e293b;
   --text-secondary: #475569;
-  --text-muted: #94a3b8;
+  --text-muted: #64748b;
   --text-inverse: #ffffff;
 
   /* Brand Accents */
@@ -73,43 +74,80 @@
 }
 
 /* Dark Theme Overrides */
-[data-theme="dark"] {
+html[data-theme="dark"] {
   color-scheme: dark;
-  --bg-app: #090d16;
-  --bg-card: #131b2e;
-  --bg-card-hover: #19233c;
-  --bg-input: #0e1424;
-  --bg-secondary: #1a233a;
-  --border-color: #24304c;
-  --border-focus: #818cf8;
+  /* Base Backgrounds (Deep neutral dark, not pure black) */
+  --bg-app: #18181b;        /* Zinc 900 */
+  --background: #18181b;    /* Zinc 900 fallback */
+  
+  /* Cards & Surfaces (Clearly lighter than background) */
+  --bg-card: #27272a;       /* Zinc 800 */
+  --surface: #27272a;       /* Zinc 800 fallback */
+  --bg-card-hover: #3f3f46; /* Zinc 700 */
+  --surface-hover: #3f3f46; /* Zinc 700 fallback */
+  
+  /* Inputs & Secondary Areas */
+  --bg-input: #121214;      /* Slightly darker than bg-app for inset feel */
+  --bg-secondary: #27272a;  /* Zinc 800 for sidebars/headers */
+  
+  /* Borders (Muted and low-contrast) */
+  --border-color: #3f3f46;  /* Zinc 700 */
+  --border-light: #3f3f46;  /* Zinc 700 fallback */
+  --border-focus: #818cf8;  /* Indigo 400 */
 
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-muted: #64748b;
-  --text-inverse: #0f172a;
+  /* Text (Comfortable typography hierarchy) */
+  --text-heading: #e4e4e7;  /* Zinc 200 */
+  --text-primary: #c4c4c8;
+  --text-secondary: #b8b8c0;
+  --text-muted: #9999a3;
+  --text-inverse: #09090b;  /* Zinc 950 */
 
-  --primary: #6366f1;
-  --primary-hover: #4f46e5;
-  --primary-light: rgba(99, 102, 241, 0.15);
-  --primary-text: #a5b4fc;
+  /* Primary Accents (Restrained Indigo) */
+  --primary: #818cf8;       /* Indigo 400 */
+  --primary-hover: #6366f1; /* Indigo 500 */
+  --primary-light: rgba(129, 140, 248, 0.15);
+  --primary-text: #c7d2fe;  /* Indigo 200 */
 
-  --success-bg: rgba(16, 185, 129, 0.15);
-  --warning-bg: rgba(245, 158, 11, 0.15);
-  --danger-bg: rgba(239, 68, 68, 0.15);
-  --info-bg: rgba(14, 165, 233, 0.15);
+  /* Status Colors (Muted for dark mode readability) */
+  --success: #34d399;       /* Emerald 400 */
+  --warning: #fbbf24;       /* Amber 400 */
+  --danger: #f87171;        /* Red 400 */
+  --info: #38bdf8;          /* Sky 400 */
+  
+  --success-bg: rgba(52, 211, 153, 0.15);
+  --warning-bg: rgba(251, 191, 36, 0.15);
+  --danger-bg: rgba(248, 113, 113, 0.15);
+  --info-bg: rgba(56, 189, 248, 0.15);
 
-  --cat-food-bg: rgba(249, 115, 22, 0.15);
-  --cat-travel-bg: rgba(2, 132, 199, 0.15);
-  --cat-shopping-bg: rgba(236, 72, 153, 0.15);
-  --cat-bills-bg: rgba(234, 179, 8, 0.15);
-  --cat-entertainment-bg: rgba(139, 92, 246, 0.15);
-  --cat-health-bg: rgba(16, 185, 129, 0.15);
-  --cat-education-bg: rgba(59, 130, 246, 0.15);
-  --cat-other-bg: rgba(100, 116, 139, 0.15);
+  /* Category Colors (Muted 400-level colors) */
+  --cat-food: #fb923c;      /* Orange 400 */
+  --cat-travel: #38bdf8;    /* Sky 400 */
+  --cat-shopping: #f472b6;  /* Pink 400 */
+  --cat-bills: #facc15;     /* Yellow 400 */
+  --cat-entertainment: #a78bfa; /* Violet 400 */
+  --cat-health: #34d399;    /* Emerald 400 */
+  --cat-education: #60a5fa; /* Blue 400 */
+  --cat-other: #94a3b8;     /* Slate 400 */
 
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --cat-food-bg: rgba(251, 146, 60, 0.15);
+  --cat-travel-bg: rgba(56, 189, 248, 0.15);
+  --cat-shopping-bg: rgba(244, 114, 182, 0.15);
+  --cat-bills-bg: rgba(250, 204, 21, 0.15);
+  --cat-entertainment-bg: rgba(167, 139, 250, 0.15);
+  --cat-health-bg: rgba(52, 211, 153, 0.15);
+  --cat-education-bg: rgba(96, 165, 250, 0.15);
+  --cat-other-bg: rgba(148, 163, 184, 0.15);
+
+  /* Subtler Shadows for Dark UI */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+}
+
+/* Custom Dark Mode Placeholders */
+html[data-theme="dark"] ::placeholder {
+  color: #52525b; /* Zinc 600 - Noticeably muted */
+  opacity: 1;
 }
 
 /* 2. BASE STYLES & RESET */
@@ -199,7 +237,7 @@ body {
   font-size: 1.4rem;
   font-weight: 800;
   letter-spacing: -0.02em;
-  background: linear-gradient(135deg, var(--text-primary) 30%, var(--primary) 100%);
+  background: linear-gradient(135deg, var(--text-heading) 30%, var(--primary) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -308,19 +346,19 @@ body {
   color: var(--primary);
 }
 
-.stat-today .stat-icon-wrapper {
-  background-color: var(--info-bg);
-  color: var(--info);
-}
-
-.stat-month .stat-icon-wrapper {
+.stat-income .stat-icon-wrapper {
   background-color: var(--success-bg);
   color: var(--success);
 }
 
-.stat-count .stat-icon-wrapper {
-  background-color: var(--cat-entertainment-bg);
-  color: var(--cat-entertainment);
+.stat-expense .stat-icon-wrapper {
+  background-color: var(--danger-bg);
+  color: var(--danger);
+}
+
+.stat-savings .stat-icon-wrapper {
+  background-color: var(--info-bg);
+  color: var(--info);
 }
 
 .stat-top-category .stat-icon-wrapper {
@@ -345,7 +383,7 @@ body {
 .stat-value {
   font-size: 1.45rem;
   font-weight: 800;
-  color: var(--text-primary);
+  color: var(--text-heading);
   line-height: 1.25;
   margin: 0.2rem 0;
   white-space: nowrap;
@@ -496,7 +534,7 @@ body {
 .budget-stat-val {
   font-size: 1rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--text-heading);
 }
 
 /* Warning alert */
@@ -576,7 +614,7 @@ html[data-theme="dark"] #budgetWarningAlert.alert-danger i {
 .card-title {
   font-size: 1.15rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--text-heading);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -1076,7 +1114,7 @@ html[data-theme="dark"] #budgetWarningAlert.alert-danger i {
 .monthly-total-amount {
   font-size: 1.25rem;
   font-weight: 800;
-  color: var(--text-primary);
+  color: var(--text-heading);
 }
 
 .monthly-card-current .monthly-total-amount {
@@ -2039,6 +2077,8 @@ html[data-theme="dark"] #budgetWarningAlert.alert-danger i {
   border-bottom: 1px solid var(--border-light);
   transition: background-color 0.2s ease;
   cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .transaction-item:last-child {
@@ -2058,7 +2098,7 @@ html[data-theme="dark"] #budgetWarningAlert.alert-danger i {
   display: flex;
   align-items: center;
   gap: 1rem;
-  flex: 1;
+  flex: 1 1 0%;
   min-width: 0;
 }
 
@@ -2086,14 +2126,14 @@ html[data-theme="dark"] #budgetWarningAlert.alert-danger i {
 .transaction-info {
   display: flex;
   flex-direction: column;
-  flex: 1;
+  flex: 1 1 0%;
   min-width: 0;
 }
 
 .transaction-desc {
   font-size: 1rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--text-heading);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2111,7 +2151,7 @@ html[data-theme="dark"] #budgetWarningAlert.alert-danger i {
 }
 
 .transaction-meta span {
-  word-break: break-word;
+  word-break: normal;
   overflow-wrap: break-word;
 }
 
@@ -2144,7 +2184,7 @@ html[data-theme="dark"] #budgetWarningAlert.alert-danger i {
 .transaction-amount {
   font-size: 1.1rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--text-heading);
 }
 
 
@@ -2200,7 +2240,7 @@ html[data-theme="dark"] #budgetWarningAlert.alert-danger i {
 .details-amount-large {
   font-size: 2.2rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--text-heading);
   text-align: center;
   margin-bottom: 1.5rem;
 }
