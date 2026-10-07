@@ -2445,10 +2445,10 @@ html[data-theme="dark"] #budgetWarningAlert.alert-danger i {
 .auth-form .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
 .auth-form label { font-weight: 600; font-size: 0.9rem; color: var(--text-primary); }
 .auth-form input { padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--input-bg, #fff); color: var(--text-primary); outline: none; transition: all 0.2s; }
-.auth-form input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
-.auth-button { margin-top: 1rem; width: 100%; padding: 0.875rem; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.2s; background: var(--primary-color); color: white; border: none; }
+.auth-form input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+.auth-button { margin-top: 1rem; width: 100%; padding: 0.875rem; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.2s; background: var(--primary); color: white; border: none; }
 .auth-button:hover:not(:disabled) { background: var(--primary-hover); transform: translateY(-1px); }
 .auth-button:disabled { opacity: 0.7; cursor: not-allowed; }
 .auth-toggle { margin-top: 2rem; font-size: 0.95rem; color: var(--text-secondary); }
-.toggle-btn { background: none; border: none; color: var(--primary-color); font-weight: 600; cursor: pointer; padding: 0; font-size: 0.95rem; transition: color 0.2s; }
+.toggle-btn { background: none; border: none; color: var(--primary); font-weight: 600; cursor: pointer; padding: 0; font-size: 0.95rem; transition: color 0.2s; }
 .toggle-btn:hover { color: var(--primary-hover); text-decoration: underline; }
