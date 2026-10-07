@@ -5,7 +5,7 @@ const cors = require('cors');
 const app = express();
 
 // Middleware
-const allowedOrigins = ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:3333'];
+const allowedOrigins = ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:3333', 'https://spend-wise-flame-seven.vercel.app'];
 if (process.env.FRONTEND_URL) {
   allowedOrigins.push(process.env.FRONTEND_URL);
 }
