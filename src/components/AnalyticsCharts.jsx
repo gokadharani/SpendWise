@@ -34,7 +34,19 @@ const AnalyticsCharts = ({ expenses }) => {
 
         // 1. Category Chart
         if (categoryChartInstance.current) categoryChartInstance.current.destroy();
-        const cats = categoriesRes.categories || [];
+        
+        const categoryMap = {};
+        (expenses || []).forEach(exp => {
+          const type = exp.type || 'Expense';
+          if (type.toLowerCase() === 'expense') {
+            const cat = exp.category || 'Uncategorized';
+            categoryMap[cat] = (categoryMap[cat] || 0) + Number(exp.amount || 0);
+          }
+        });
+        
+        const cats = Object.keys(categoryMap)
+          .map(cat => ({ category: cat, amount: categoryMap[cat] }))
+          .sort((a, b) => b.amount - a.amount);
         if (!cats.length) {
           categoryChartInstance.current = new Chart(categoryChartRef.current, {
             type: 'doughnut',
