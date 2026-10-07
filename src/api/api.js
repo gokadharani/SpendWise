@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://spendwise-5t2s.onrender.com/api';
 
 const TOKEN_KEY = 'spendwise_token';
 
