@@ -4,6 +4,7 @@ const prisma = require('../prisma');
 const formatTransaction = (tx) => ({
   ...tx,
   amount: tx.amount.toNumber(),
+  date: tx.date.toISOString().split('T')[0]
 });
 
 const createTransaction = async (req, res) => {
