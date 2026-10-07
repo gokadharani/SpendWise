@@ -1,18 +1,19 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import Chart from 'chart.js/auto';
+import { Doughnut, Line, Pie } from 'react-chartjs-2';
 import { formatCurrency, formatMonthYear } from '../utils';
-import { getAnalyticsCategories, getAnalyticsTrends, getAnalyticsTypes } from '../api/analytics';
+import { getAnalyticsTrends, getAnalyticsTypes } from '../api/analytics';
 
 const AnalyticsCharts = ({ expenses }) => {
-  const categoryChartRef = useRef(null);
-  const trendChartRef = useRef(null);
-  const typeChartRef = useRef(null);
-
-  const categoryChartInstance = useRef(null);
-  const trendChartInstance = useRef(null);
-  const typeChartInstance = useRef(null);
-  
+  const [trends, setTrends] = useState([]);
+  const [types, setTypes] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Make Chart.js inherit the app's dynamic text color hierarchy
+    const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim() || '#666';
+    Chart.defaults.color = textColor;
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -20,100 +21,15 @@ const AnalyticsCharts = ({ expenses }) => {
     const fetchAndRenderCharts = async () => {
       setLoading(true);
       try {
-        const [categoriesRes, trendsRes, typesRes] = await Promise.all([
-          getAnalyticsCategories(),
-          getAnalyticsTrends(),
-          getAnalyticsTypes()
+        const [trendsRes, typesRes] = await Promise.all([
+          getAnalyticsTrends().catch(() => ({ trends: [] })),
+          getAnalyticsTypes().catch(() => ({ types: [] }))
         ]);
         
         if (!isMounted) return;
 
-        // Make Chart.js inherit the app's dynamic text color hierarchy
-        const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim() || '#666';
-        Chart.defaults.color = textColor;
-
-        // 1. Category Chart
-        if (categoryChartInstance.current) categoryChartInstance.current.destroy();
-        
-        const categoryMap = {};
-        (expenses || []).forEach(exp => {
-          const type = exp.type || 'Expense';
-          if (type.toLowerCase() === 'expense') {
-            const cat = exp.category || 'Uncategorized';
-            categoryMap[cat] = (categoryMap[cat] || 0) + Number(exp.amount || 0);
-          }
-        });
-        
-        const cats = Object.keys(categoryMap)
-          .map(cat => ({ category: cat, amount: categoryMap[cat] }))
-          .sort((a, b) => b.amount - a.amount);
-        if (!cats.length) {
-          categoryChartInstance.current = new Chart(categoryChartRef.current, {
-            type: 'doughnut',
-            data: { labels: ['No Data'], datasets: [{ data: [1], backgroundColor: ['#e5e7eb'], borderWidth: 0 }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, cutout: '70%' }
-          });
-        } else {
-          const labels = cats.map(c => c.category);
-          const data = cats.map(c => c.amount);
-          const bg = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#14b8a6', '#f43f5e', '#6366f1'];
-          categoryChartInstance.current = new Chart(categoryChartRef.current, {
-            type: 'doughnut',
-            data: { labels, datasets: [{ data, backgroundColor: bg, borderWidth: 1, borderColor: '#ffffff' }] },
-            options: {
-              responsive: true, maintainAspectRatio: false, cutout: '65%',
-              plugins: {
-                legend: { position: 'right', labels: { boxWidth: 12, padding: 15 } },
-                tooltip: { callbacks: { label: (ctx) => ` ${ctx.label || ''}: ${formatCurrency(ctx.raw || 0)}` } }
-              }
-            }
-          });
-        }
-
-        // 2. Trend Chart
-        if (trendChartInstance.current) trendChartInstance.current.destroy();
-        const trends = trendsRes.trends || [];
-        if (!trends.length) {
-          trendChartInstance.current = new Chart(trendChartRef.current, {
-            type: 'line', data: { labels: ['No Data'], datasets: [{ data: [0], borderColor: '#e5e7eb', borderWidth: 2, pointBackgroundColor: '#e5e7eb' }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } } }
-          });
-        } else {
-          const formattedLabels = trends.map(t => formatMonthYear(t.month));
-          const data = trends.map(t => t.amount);
-          trendChartInstance.current = new Chart(trendChartRef.current, {
-            type: 'line',
-            data: { labels: formattedLabels, datasets: [{ label: 'Total Spent', data, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 3, tension: 0.3, fill: true, pointBackgroundColor: '#ffffff', pointBorderColor: '#3b82f6', pointBorderWidth: 2, pointRadius: 4, pointHoverRadius: 6 }] },
-            options: {
-              responsive: true, maintainAspectRatio: false,
-              plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => ` ${formatCurrency(ctx.raw || 0)}` } } },
-              scales: { x: { grid: { display: false } }, y: { beginAtZero: true, ticks: { callback: (val) => formatCurrency(val) } } }
-            }
-          });
-        }
-
-        // 3. Types Chart (Replaces Payment Method)
-        if (typeChartInstance.current) typeChartInstance.current.destroy();
-        const types = typesRes.types || [];
-        const hasData = types.some(t => t.amount > 0);
-        if (!hasData) {
-          typeChartInstance.current = new Chart(typeChartRef.current, {
-            type: 'pie', data: { labels: ['No Data'], datasets: [{ data: [1], backgroundColor: ['#e5e7eb'], borderWidth: 0 }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, cutout: '0%' }
-          });
-        } else {
-          const labels = types.map(t => t.type);
-          const data = types.map(t => t.amount);
-          const bg = ['#10b981', '#ef4444', '#3b82f6', '#f59e0b']; // Income(Green), Expense(Red), Savings(Blue), Investment(Yellow)
-          typeChartInstance.current = new Chart(typeChartRef.current, {
-            type: 'pie',
-            data: { labels, datasets: [{ data, backgroundColor: bg, borderWidth: 1, borderColor: '#ffffff' }] },
-            options: {
-              responsive: true, maintainAspectRatio: false, cutout: '0%',
-              plugins: { legend: { position: 'right', labels: { boxWidth: 12, padding: 15 } }, tooltip: { callbacks: { label: (ctx) => ` ${ctx.label || ''}: ${formatCurrency(ctx.raw || 0)}` } } }
-            }
-          });
-        }
+        setTrends(trendsRes?.trends || []);
+        setTypes(typesRes?.types || []);
       } catch (err) {
         console.error("Failed to load analytics data", err);
       } finally {
@@ -125,11 +41,130 @@ const AnalyticsCharts = ({ expenses }) => {
     
     return () => {
       isMounted = false;
-      if (categoryChartInstance.current) categoryChartInstance.current.destroy();
-      if (trendChartInstance.current) trendChartInstance.current.destroy();
-      if (typeChartInstance.current) typeChartInstance.current.destroy();
     };
   }, [expenses]);
+
+  // 1. Category Chart Data (calculated locally from expenses)
+  const categoryData = useMemo(() => {
+    const categoryMap = {};
+    (expenses || []).forEach(exp => {
+      const type = exp.type || 'Expense';
+      if (type.toLowerCase() === 'expense') {
+        const cat = exp.category || 'Uncategorized';
+        categoryMap[cat] = (categoryMap[cat] || 0) + Number(exp.amount || 0);
+      }
+    });
+    
+    return Object.keys(categoryMap)
+      .map(cat => ({ category: cat, amount: categoryMap[cat] }))
+      .sort((a, b) => b.amount - a.amount);
+  }, [expenses]);
+
+  const hasCategoryData = categoryData.length > 0;
+  const categoryLabels = hasCategoryData ? categoryData.map(c => c.category) : ['No Data'];
+  const categoryValues = hasCategoryData ? categoryData.map(c => c.amount) : [1];
+  const categoryBg = hasCategoryData 
+    ? ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#14b8a6', '#f43f5e', '#6366f1'] 
+    : ['#e5e7eb'];
+
+  const doughnutData = {
+    labels: categoryLabels,
+    datasets: [{
+      data: categoryValues,
+      backgroundColor: categoryBg,
+      borderWidth: hasCategoryData ? 1 : 0,
+      borderColor: hasCategoryData ? '#ffffff' : 'transparent'
+    }]
+  };
+
+  const doughnutOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: hasCategoryData ? '65%' : '70%',
+    plugins: {
+      legend: { 
+        display: hasCategoryData, 
+        position: 'right', 
+        labels: { boxWidth: 12, padding: 15 } 
+      },
+      tooltip: { 
+        enabled: hasCategoryData,
+        callbacks: { label: (ctx) => ` ${ctx.label || ''}: ${formatCurrency(ctx.raw || 0)}` } 
+      }
+    }
+  };
+
+  // 2. Trend Chart Data
+  const hasTrendData = trends.length > 0;
+  const trendLabels = hasTrendData ? trends.map(t => formatMonthYear(t.month)) : ['No Data'];
+  const trendValues = hasTrendData ? trends.map(t => t.amount) : [0];
+
+  const lineData = {
+    labels: trendLabels,
+    datasets: [{
+      label: 'Total Spent',
+      data: trendValues,
+      borderColor: hasTrendData ? '#3b82f6' : '#e5e7eb',
+      backgroundColor: hasTrendData ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+      borderWidth: hasTrendData ? 3 : 2,
+      tension: 0.3,
+      fill: hasTrendData,
+      pointBackgroundColor: hasTrendData ? '#ffffff' : '#e5e7eb',
+      pointBorderColor: hasTrendData ? '#3b82f6' : 'transparent',
+      pointBorderWidth: hasTrendData ? 2 : 0,
+      pointRadius: hasTrendData ? 4 : 0,
+      pointHoverRadius: hasTrendData ? 6 : 0
+    }]
+  };
+
+  const lineOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { 
+      legend: { display: false }, 
+      tooltip: { 
+        enabled: hasTrendData,
+        callbacks: { label: (ctx) => ` ${formatCurrency(ctx.raw || 0)}` } 
+      } 
+    },
+    scales: { 
+      x: { display: hasTrendData, grid: { display: false } }, 
+      y: { display: hasTrendData, beginAtZero: true, ticks: { callback: (val) => formatCurrency(val) } } 
+    }
+  };
+
+  // 3. Types Chart Data
+  const hasTypeData = types.some(t => t.amount > 0);
+  const typeLabels = hasTypeData ? types.map(t => t.type) : ['No Data'];
+  const typeValues = hasTypeData ? types.map(t => t.amount) : [1];
+  const typeBg = hasTypeData ? ['#10b981', '#ef4444', '#3b82f6', '#f59e0b'] : ['#e5e7eb']; // Income, Expense, Savings, Investment
+
+  const pieData = {
+    labels: typeLabels,
+    datasets: [{
+      data: typeValues,
+      backgroundColor: typeBg,
+      borderWidth: hasTypeData ? 1 : 0,
+      borderColor: hasTypeData ? '#ffffff' : 'transparent'
+    }]
+  };
+
+  const pieOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '0%',
+    plugins: { 
+      legend: { 
+        display: hasTypeData, 
+        position: 'right', 
+        labels: { boxWidth: 12, padding: 15 } 
+      }, 
+      tooltip: { 
+        enabled: hasTypeData,
+        callbacks: { label: (ctx) => ` ${ctx.label || ''}: ${formatCurrency(ctx.raw || 0)}` } 
+      } 
+    }
+  };
 
   return (
     <div className="card charts-card">
@@ -148,15 +183,15 @@ const AnalyticsCharts = ({ expenses }) => {
         <div className="charts-grid">
           <div className="chart-box">
             <h3 className="chart-title">Breakdown by Category</h3>
-            <div className="chart-canvas-wrapper"><canvas ref={categoryChartRef}></canvas></div>
+            <div className="chart-canvas-wrapper"><Doughnut data={doughnutData} options={doughnutOptions} /></div>
           </div>
           <div className="chart-box">
             <h3 className="chart-title">Monthly Spending Trend</h3>
-            <div className="chart-canvas-wrapper"><canvas ref={trendChartRef}></canvas></div>
+            <div className="chart-canvas-wrapper"><Line data={lineData} options={lineOptions} /></div>
           </div>
           <div className="chart-box">
             <h3 className="chart-title">Transaction Types</h3>
-            <div className="chart-canvas-wrapper"><canvas ref={typeChartRef}></canvas></div>
+            <div className="chart-canvas-wrapper"><Pie data={pieData} options={pieOptions} /></div>
           </div>
         </div>
       )}
