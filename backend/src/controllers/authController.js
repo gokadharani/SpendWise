@@ -61,7 +61,7 @@ const login = async (req, res) => {
     });
 
     if (!user) {
-      return res.status(401).json({ success: false, message: 'Invalid email or password' });
+      return res.status(401).json({ success: false, message: 'Account does not exist. Please create an account.' });
     }
 
     const isMatch = await bcrypt.compare(password, user.passwordHash);
